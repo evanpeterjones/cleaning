@@ -1,4 +1,4 @@
-package cleaning.src;
+package src;
 
 /** the Cata-log Program
  *
@@ -11,46 +11,89 @@ package cleaning.src;
  *
  */
 
+import java.util.Scanner;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Map;/*
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;*/
 
 public class catalog {
     private String filePath;
-    private Sheet sheet;
-    private static final Map<String, String> aliases = createMap();
+    //private Sheet sheet;
+    public static final Map<String, String> aliases = createMap();
     //following variables store column #s from the excel file
-    private String[] columnValues = new String[10];
+    public String[] columnValues;
     private BufferedWriter toTSV;
     private static String[] removals = {
         "AS ", "SOME ", "'", "\"", ",", "-", "_", ".",
     };
-    private String alias = "";
-    private String upc = "";
-    private String msrp = "";
-    private String brand = "";
+    public String alias = "";
+    public String upc = "";
+    public String msrp = "";
+    public String brand = "";
 
     public catalog(String fileName) throws IOException {
-        //setup input file
         FileInputStream file = new FileInputStream(new File(fileName));
-        Workbook wb = new XSSFWorkbook(file);
-        //setup formatter so MSRP method doesn't waste memory creating extra formatters
-        //DecimalFormat f = new DecimalFormat(".##");
-        //f.setRoundingMode(RoundingMode.CEILING);
-        //setup the output file
-        File tsv = new File(fileName.replace(".xlsx", ".tsv"));
+        BufferedReader read;
+        if (fileName.contains("xlsx")){
+            //Workbook wb = new XSSFWorkbook(file);
+        } else if (fileName.contains("tsv")) {
+            
+        } else {
+            System.out.println("Error, file not acceptable");
+            System.exit(1);
+        }
+        read = new BufferedReader(new FileReader( new File(fileName)));
+        File tsv = new File("rename_me.tsv");
         toTSV = new BufferedWriter(new FileWriter(tsv));
-        readCatalog(wb);
+        columnValues = read.readLine().split("\t");
+        //readCatalog(wb);
+        read(read);
     }
     public catalog() {
         //this is for testing methods
         //remove this;
+    }
+    public void read(BufferedReader read) throws IOException {
+        String line = read.readLine();
+        String row[] = line.split("\t");
+        String currentCell = "";
+        while (line != null) {
+            row = line.split("\t");
+            for (int i = 0; i < row.length; i++) {
+                currentCell = row[i];
+                switch (currentCell) {
+                    case "RECEIPT ALIAS":
+                        //alias = currentCell;
+                        output(getReceiptAlias(currentCell, brand));
+                        //TODO: write algorithm to parse and determine the value of the new String
+                        //with the data, once correctly formatted, we could skip storing in the arraylist
+                        //and just automatically write it to the cells of a new excel file.
+                        break;
+                    case "UPC":
+                        //upc = getUPC(currentCell);
+                        output(getUPC(currentCell));
+                        break;
+                    case "MSRP":
+                        //msrp = getMSRP(currentCell);
+                        output(getMSRP(currentCell));
+                        break;
+                    //case "BRAND":
+                        //brand = currentCell;
+
+                      //  break;
+                    default :
+                        output(currentCell);
+                        break;
+                }
+            }
+            line = read.readLine();
+        }
     }
     private static Map<String, String> createMap() {
         Map<String, String> myMap = new HashMap<String, String>();
@@ -82,7 +125,7 @@ public class catalog {
      * "UPC", "RECEIPT ALIAS". caps does not matter, all output is Capitalized
      *
      * @param book
-     */
+
     private void readCatalog(Workbook book) {
         sheet = book.getSheetAt(0);
         int rowNum = 0;
@@ -213,15 +256,16 @@ public class catalog {
         String[] parsed = originalvalue.split(" ");
         int in = 0;
         int NUM_REMOVE = cellValue.length() - 32;
+        System.out.println(NUM_REMOVE + " " + parsed.length + " " + parsed[0]);
         String[] chars = {"A", "E","I","O","U"};
         /*
         oh god, this is a mess, please simplify this so it's legible
         */
         for (int i = 0; i < parsed.length; i++) {
             String sub = parsed[i];
-            if (sub == brand) { NUM_REMOVE -= sub.length(); continue; }
+            if (sub == brand) { NUM_REMOVE -= brand.length(); continue; }
             if (aliases.containsKey(sub)) {
-                newString += aliases.get(sub + " ");
+                newString += aliases.get(sub + " ") + " ";
             } else {
                 in = 0;
                 String temp = sub;
@@ -249,7 +293,7 @@ public class catalog {
         //String fileName = args[0];
         catalog wb = new catalog();
         //row test = new row(new BufferedWriter(new File("hes.txt")));
-        String test = "this and that testestestesteste";
+        String test = "this and that testestestestestetest";
         System.out.println(test.length());
         System.out.println(wb.getReceiptAlias(test, "hello"));
 
