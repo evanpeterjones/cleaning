@@ -10,7 +10,7 @@ package src;
  * @author Evan Jones
  *
  */
-
+import java.util.*;
 import java.util.Scanner;
 import java.io.*;
 import java.util.ArrayList;
@@ -254,28 +254,45 @@ public class catalog {
         String originalvalue = cellValue.toUpperCase();
         String newString = "";
         String[] parsed = originalvalue.split(" ");
-        int in = 0;
         int NUM_REMOVE = cellValue.length() - 32;
         System.out.println(NUM_REMOVE + " " + parsed.length + " " + parsed[0]);
-        String[] chars = {"A", "E","I","O","U"};
+        Set<String> chars = new HashSet<String>(Arrays.asList(
+                new String[] {"A","E","I","O","U"}
+        ));
         /*
         oh god, this is a mess, please simplify this so it's legible
         */
+        // TODO: add a check for years, so "2018" become "18"
         for (int i = 0; i < parsed.length; i++) {
             String sub = parsed[i];
+            //if substring is the brand, skip concatenating it
             if (sub == brand) { NUM_REMOVE -= brand.length(); continue; }
+            //if substring already has an alias, concatenate that and continue
             if (aliases.containsKey(sub)) {
                 newString += aliases.get(sub + " ") + " ";
-            } else {
-                in = 0;
-                String temp = sub;
-                while (NUM_REMOVE > 0) {
-                    int val = temp.lastIndexOf(chars[in]);
-                    temp = temp.substring(0, val-1) + temp.substring(val, sub.length());
-                    in = in == chars.length-1 ? 0 : (in + 1);
-                    NUM_REMOVE--;
-                }
-                newString += temp + " ";
+                continue;
+            }
+            //otherwise this fucking mess... remove vowels? ?
+            else {
+                for (int j = sub.length(); j >= 0; j--) {
+                    if (chars.contains(sub.charAt(j))) {
+                        newString += sub.substring(0,j-1) + sub.substring(j, sub.length()-1);
+                    } else {
+                        System.out.println("NO");
+                    }
+                }/*
+                for (String vowel : chars) {
+                    val = temp.lastIndexOf(vowel);
+                    System.out.print(val + " " + newString);
+                    if (val != -1) {
+                        System.out.print(vowel + "test");
+                        temp = temp.substring(0, val - 1) + temp.substring(val, sub.length() - 1);
+                        in = in == chars.length - 1 ? 0 : (in + 1);
+                        NUM_REMOVE--;
+                    }
+                    System.out.println(temp);
+                    newString += temp + " ";
+                }*/
             }
         }
         return newString;
