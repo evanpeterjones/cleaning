@@ -61,6 +61,7 @@ public class catalog {
     }
     public void read(BufferedReader read) throws IOException {
         String line = read.readLine();
+        toTSV.append(line+"\n");
         String row[] = line.split("\t");
         String currentCell = "";
         while (line != null) {
@@ -68,6 +69,9 @@ public class catalog {
             for (int i = 0; i < row.length; i++) {
                 currentCell = row[i];
                 switch (currentCell) {
+                    case "LENGTH":
+                        //this gets rid of the extraneous row you probably forgot t  o delete, idiot...
+                        break;
                     case "RECEIPT ALIAS":
                         //alias = currentCell;
                         output(getReceiptAlias(currentCell, brand));
@@ -92,13 +96,14 @@ public class catalog {
                         break;
                 }
             }
+            toTSV.append("\n");
             line = read.readLine();
         }
     }
     private static Map<String, String> createMap() {
         Map<String, String> myMap = new HashMap<String, String>();
         myMap.put("WITH ", "W/");myMap.put("AND ", "& ");myMap.put("HIGH ", "HI ");myMap.put("LOW ", "LO ");
-        myMap.put("AS ", null);myMap.put("SOME ", null);myMap.put("ZERO ", "0 ");myMap.put("ONE ", "1 ");
+        myMap.put("AS ", "");myMap.put("SOME ", "");myMap.put("ZERO ", "0 ");myMap.put("ONE ", "1 ");
         myMap.put("TWO ", "2 ");myMap.put("THREE ", "3 ");myMap.put("FOUR ", "4 ");myMap.put("FIVE ", "5 ");
         myMap.put("SIX ", "6 ");myMap.put("SEVEN ", "7 ");myMap.put("EIGHT ", "8 ");myMap.put("NINE ", "9 ");
         myMap.put("ULTRA ", "ULT ");myMap.put("ANTI-OXIDANT ", "ANTI-OXI ");myMap.put("UNSWEETENED ", "UNSWTND ");
@@ -113,7 +118,7 @@ public class catalog {
         myMap.put("TWICE ", "2");myMap.put("DOUBLE ", "DBL ");myMap.put("METABOLISM ", "METABLSM ");myMap.put("METABLSM ", "MTBLSM");
         myMap.put("ARGAN ", "ARGN ");myMap.put("ARGN ", "ARG ");myMap.put("FACIAL ", "FACL ");myMap.put("FACL ", "FAC ");
         myMap.put("TREATMENT ", "TRTMNT ");myMap.put("CHAMOMILE ", "CHAM ");myMap.put("SUSTAINED ", "SUST ");
-        myMap.put("RELEASE ", "REL ");
+        myMap.put("RELEASE ", "REL ");myMap.put("DE ", "");
 
         return myMap;
     }
@@ -243,6 +248,36 @@ public class catalog {
         return checkDigChar;
     }
 
+    /** receiptBrute(String, int)
+     *
+     * Recursively remove shortest words from String
+     *
+     * @param full
+     * @param run
+     * @return
+     */
+    private String receiptBrute(String full, int run) {
+        int rem = full.length() - 32;
+        String[] sentence = full.split(" ");
+        String newStr = "";
+        int shortest = 0;
+        int index =0;
+        for (String word : sentence) {
+            if (word.length() < sentence[shortest].length()) {
+                shortest = index;
+            } index++;
+        }
+        for (int j = 0; j < sentence.length; j++) {
+            if (j != shortest) {
+                newStr += j != sentence.length-1 ? sentence[j]+" " : sentence[j];
+            }
+        }
+        if (newStr.length() > 32 && run < 5) {
+            newStr = receiptBrute(newStr, run+1);
+        }
+        return newStr;
+    }
+
     /** getReceiptAlias(String)
      *
      * this method takes a String value and returns the minimized receipt alias
@@ -251,49 +286,48 @@ public class catalog {
      */
     private String getReceiptAlias(String cellValue, String brand) {
         if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase(); }
-        String originalvalue = cellValue.toUpperCase();
         String newString = "";
-        String[] parsed = originalvalue.split(" ");
+        String[] parsed = cellValue.toUpperCase().split(" ");
         int NUM_REMOVE = cellValue.length() - 32;
-        System.out.println(NUM_REMOVE + " " + parsed.length + " " + parsed[0]);
-        Set<String> chars = new HashSet<String>(Arrays.asList(
-                new String[] {"A","E","I","O","U"}
-        ));
+        int track = NUM_REMOVE;
+        int numActRemoved = 0;
+        String[] chars = {"A","E","I","O","U"};
+
         /*
         oh god, this is a mess, please simplify this so it's legible
         */
         // TODO: add a check for years, so "2018" become "18"
         for (int i = 0; i < parsed.length; i++) {
-            String sub = parsed[i];
+            String sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
             //if substring is the brand, skip concatenating it
-            if (sub == brand) { NUM_REMOVE -= brand.length(); continue; }
+            if (sub.equals(brand)) { NUM_REMOVE -= brand.length()+1; continue; }
+            if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
             //if substring already has an alias, concatenate that and continue
-            if (aliases.containsKey(sub)) {
-                newString += aliases.get(sub + " ") + " ";
+            if (aliases.get(sub+" ") != null) {
+                String fromAlias = aliases.get(sub + " ");
+                newString += fromAlias;
+                NUM_REMOVE -= sub.length() - fromAlias.length();
+               // System.out.println("Hashmap is working! Saved " + fromAlias.length() + " many characters!!");
                 continue;
             }
             //otherwise this fucking mess... remove vowels? ?
             else {
-                for (int j = sub.length(); j >= 0; j--) {
-                    if (chars.contains(sub.charAt(j))) {
-                        newString += sub.substring(0,j-1) + sub.substring(j, sub.length()-1);
-                    } else {
-                        System.out.println("NO");
-                    }
-                }/*
-                for (String vowel : chars) {
-                    val = temp.lastIndexOf(vowel);
-                    System.out.print(val + " " + newString);
-                    if (val != -1) {
-                        System.out.print(vowel + "test");
-                        temp = temp.substring(0, val - 1) + temp.substring(val, sub.length() - 1);
-                        in = in == chars.length - 1 ? 0 : (in + 1);
+                String temp = sub;
+                int numRemoved = 0;
+                for (String ch : chars) {
+                    int v = temp.lastIndexOf(ch);
+                    if (v > 0 && v < temp.length()-1 && NUM_REMOVE > 0) {
+                        temp = temp.substring(0,v) + (temp.substring(v+1, temp.length()));
+                        numRemoved++;
                         NUM_REMOVE--;
                     }
-                    System.out.println(temp);
-                    newString += temp + " ";
-                }*/
+                }
+                newString+= i==0 ? temp : " "+temp;
+                numActRemoved += numRemoved;
             }
+        }
+        if (NUM_REMOVE > 0) {
+            return receiptBrute(newString, 0);
         }
         return newString;
     }
@@ -307,14 +341,17 @@ public class catalog {
     }
 
      public static void main(String[] args) throws IOException {
-        //String fileName = args[0];
-        catalog wb = new catalog();
-        //row test = new row(new BufferedWriter(new File("hes.txt")));
-        String test = "this and that testestestestestetest";
-        System.out.println(test.length());
-        System.out.println(wb.getReceiptAlias(test, "hello"));
+        catalog wb = new catalog(args[0]);
+
+        // TESTING
+         /*
+        String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
+        String ret = wb.getReceiptAlias(test, "JACKSON");
+        System.out.println("Start Phrase: " + test.length() + "\n" + test);
+        System.out.println("End Phrase: " + ret.length() + "\n" + ret);
 
         //catalog test = new catalog();
         //System.out.println(test.checkDigit("03600024147"));
+        */
     }
 }
