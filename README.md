@@ -1,3 +1,5 @@
 # catalog
 
+@version 0.9.1 - the naming convention is not a convention, but the main program is working now. SO, now I'm just building it out! Fun!
+
 @version 0.1 - Essentially started with the barebones of what I needed. The program now successfully reads excel data into an array, and successfully writes a new file in the tsv format. I don't understand versioning, so .1 is arbitrary, but it felt very wrong to call it 1.0 because the methods for Receipt Alias Modifier, and most of the others are missing. Right now only the UPC 0-extension and checkDigit calculator are working (but may need updating if the UPCs need to allow for other formats like UPC-E and EAN, then we'll need some helper methods for each specific case. Fun!!! The Receipt Alias is a challenge, I was planning on using regular expressions to replace strings, but in Java there's not a simple way to do that without a ton of calls to a regex replace.
