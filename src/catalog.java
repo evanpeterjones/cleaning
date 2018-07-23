@@ -6,7 +6,7 @@ package src;
  *  they are ready for import to the Universal Product Database.
  *  The name should be read like "catapult", but catalog, lol!!
  *
- * @version 0.1
+ * @version 0.9.1
  * @author Evan Jones
  *
  */
@@ -15,19 +15,13 @@ import java.util.Scanner;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;/*
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;*/
+import java.util.Map;
 
 public class catalog {
     private String filePath;
     //private Sheet sheet;
     public static final Map<String, String> aliases = createMap();
     //following variables store column #s from the excel file
-    public String[] columnValues;
     private BufferedWriter toTSV;
     private static String[] removals = {
         "AS ", "SOME ", "'", "\"", ",", "-", "_", ".",
@@ -51,7 +45,6 @@ public class catalog {
         read = new BufferedReader(new FileReader( new File(fileName)));
         File tsv = new File("rename_me.tsv");
         toTSV = new BufferedWriter(new FileWriter(tsv));
-        columnValues = read.readLine().split("\t");
         //readCatalog(wb);
         read(read);
     }
@@ -62,15 +55,22 @@ public class catalog {
     public void read(BufferedReader read) throws IOException {
         String line = read.readLine();
         toTSV.append(line+"\n");
-        String row[] = line.split("\t");
+        String columvals[] = line.split("\t");
+        line = read.readLine();
+        String row[];
         String currentCell = "";
+        char aliasRowChar = (char)(Arrays.asList(columvals).indexOf("RECEIPT ALIAS")+65);
+        int rownum = 0;
+
         while (line != null) {
             row = line.split("\t");
+            rownum++;
             for (int i = 0; i < row.length; i++) {
                 currentCell = row[i];
-                switch (currentCell) {
+                switch (columvals[i].toUpperCase()) {
                     case "LENGTH":
-                        //this gets rid of the extraneous row you probably forgot t  o delete, idiot...
+                        //UNCOMMENT THIS TO TEST RECEIPT ALIAS LENGTH OUTPUT
+                       // output("=if(len("+aliasRowChar+rownum+")>32, len("+aliasRowChar+rownum+"),\".\")");
                         break;
                     case "RECEIPT ALIAS":
                         //alias = currentCell;
@@ -175,14 +175,6 @@ public class catalog {
         }
     }
 
-    /** rowWrite
-     *  helper method that gathers and checks all data before it's written to the output file. this method ensures
-     *  the data for each product is self-aware, somewhat.
-     */
-    private void rowWrite() {
-     //   output(upc + "\t" + getReceiptAlias(alias, ) );
-    }
-
     /** output
      *
      * helper method for readability
@@ -202,20 +194,20 @@ public class catalog {
      * @param UPC
      * @return
      */
-    private String getUPC(String UPC) {
+    private String getUPC(String theUPC) {
+        String UPC = (theUPC.charAt(0) == '0' && theUPC.length() == 12) ? (theUPC.substring(theUPC.length() - 11,
+                theUPC.length())) : theUPC;
         String newUPC = "";
         switch (UPC.length()) {
             case 11:
                 newUPC = UPC + checkDigit(UPC);
                 break;
-            case 12:
-                newUPC = UPC;
-                break;
             default:
                 if (UPC.length() < 11) {
                     //only UPCs of length 11 have shown to not include the check digit
-                    for (int i = 1; i < (12 - UPC.length()); i++) { newUPC += "0"; }
+                    for (int i = 0; i < (11 - UPC.length()); i++) { newUPC += "0"; }
                     newUPC += UPC;
+                    newUPC += checkDigit(newUPC);
                 } else {
                     newUPC = UPC;
                 }
@@ -231,6 +223,7 @@ public class catalog {
      * @return checkDigChar
      */
     private char checkDigit(String UPC) {
+        if (UPC.length() != 11) { System.out.println("ERROR, UPC LENGTH"); }
         char checkDigChar;
         int odd = 0;
         int even = 0;
@@ -342,7 +335,12 @@ public class catalog {
 
      public static void main(String[] args) throws IOException {
         catalog wb = new catalog(args[0]);
+        /*catalog wb = new catalog();
 
+        String value = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 6";
+        String a = wb.getReceiptAlias(value, "test");
+        System.out.println(a + " " + a.length());
+        */
         // TESTING
          /*
         String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
