@@ -1,50 +1,100 @@
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 898194002047. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 801740079976. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 737686381033. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 856036061081. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 801740079808. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 852285002070. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 737868132052. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 1898061012639. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 737868050011. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 947799050018. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 852282062292. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 689076060997. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 689076200293. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 949922928443. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 493448611809. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 737686132043. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 875559001943. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 835603003455. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 891485000982. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 383002047201. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 383002047193. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 383002047166. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 717208896243. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 309610006728. Please Re-check Item Information.
-pinnacle_7-23-18.tsv
-Error Inserting Item With GTIN 3706236240218. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 84799080046. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 85597900410. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 228470022. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 72258800196. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 85603600100. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 1286937613. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 74016224080. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 4524359000. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 12086522013. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 6206703871. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 4095157511. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 6206702731519. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 6991762033170. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 60311090052. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 9819400208. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 5703162000005. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 4951875142. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 89819400208. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 4095147511. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 82491082021. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 75042820837. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 68919237067. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 65621843226. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 70429400999. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 2284700233. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 71720888376. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 69917607331. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 83560300540. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 4095127511. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 89476000049. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 7804606600645. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 87342400042. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 85579004081. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 69859065774. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 18783300602. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 6206702860. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 87971600013. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 87971600037. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 87971600044. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 45243000126. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 7291889942000. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 45243000161. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 89036500102. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 76166600048. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 76166600062. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 76166600001. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 37398027172. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 94799011146. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 9479910034. Please Re-check Item Information.
+PINN_7-24-18.tsv
+Error Inserting Item With GTIN 9947955055. Please Re-check Item Information.

@@ -16,6 +16,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.time.format.DateTimeFormatter;  
+import java.time.LocalDateTime;
 
 public class catalog {
     private String filePath;
@@ -43,7 +45,9 @@ public class catalog {
             System.exit(1);
         }
         read = new BufferedReader(new FileReader( new File(fileName)));
-        File tsv = new File("rename_me.tsv");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");  
+        LocalDateTime now = LocalDateTime.now();
+        File tsv = new File(fileName.replace(".tsv","_"+dtf.format(now)+".tsv"));
         toTSV = new BufferedWriter(new FileWriter(tsv));
         //readCatalog(wb);
         read(read);
@@ -54,7 +58,7 @@ public class catalog {
     }
     public void read(BufferedReader read) throws IOException {
         String line = read.readLine();
-        toTSV.append(line+"\n");
+        toTSV.append(line.replace("length\t","")+"\n");
         String columvals[] = line.split("\t");
         line = read.readLine();
         String row[];
@@ -278,14 +282,13 @@ public class catalog {
      * @param cellValue
      */
     private String getReceiptAlias(String cellValue, String brand) {
-        if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase(); }
+        if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z ]",""); }
         String newString = "";
         String[] parsed = cellValue.toUpperCase().split(" ");
         int NUM_REMOVE = cellValue.length() - 32;
         int track = NUM_REMOVE;
         int numActRemoved = 0;
         String[] chars = {"A","E","I","O","U"};
-
         /*
         oh god, this is a mess, please simplify this so it's legible
         */
@@ -294,6 +297,7 @@ public class catalog {
             String sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
             //if substring is the brand, skip concatenating it
             if (sub.equals(brand)) { NUM_REMOVE -= brand.length()+1; continue; }
+            //regex to fix year
             if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
             //if substring already has an alias, concatenate that and continue
             if (aliases.get(sub+" ") != null) {
@@ -322,10 +326,12 @@ public class catalog {
         if (NUM_REMOVE > 0) {
             return receiptBrute(newString, 0);
         }
-        return newString;
+        return newString.replaceAll("[^a-zA-Z0-9 ]", "").replaceAll("  "," ");
     }
 
     private String getMSRP(String msrp) {
+        if (msrp == null)
+            return "";
         String newMSRP = "";
         String[] pieces = msrp.split(".", 1);
         newMSRP += pieces[0] + ".";
@@ -337,10 +343,10 @@ public class catalog {
         catalog wb = new catalog(args[0]);
         /*catalog wb = new catalog();
 
-        String value = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 6";
+        String value = "BROUWERIJ VERHAEGHE - ch. DUCHESSE DE BOURGOGNE FLEMISH RD 6";
         String a = wb.getReceiptAlias(value, "test");
         System.out.println(a + " " + a.length());
-        */
+        
         // TESTING
          /*
         String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
