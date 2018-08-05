@@ -25,6 +25,7 @@ public class catalog {
     public static final Map<String, String> aliases = createMap();
     //following variables store column #s from the excel file
     private BufferedWriter toTSV;
+    private BufferedReader r;
     private static String[] removals = {
         "AS ", "SOME ", "'", "\"", ",", "-", "_", ".",
     };
@@ -35,7 +36,6 @@ public class catalog {
 
     public catalog(String fileName) throws IOException {
         FileInputStream file = new FileInputStream(new File(fileName));
-        BufferedReader read;
         if (fileName.contains("xlsx")){
             //Workbook wb = new XSSFWorkbook(file);
         } else if (fileName.contains("tsv")) {
@@ -44,13 +44,15 @@ public class catalog {
             System.out.println("Error, file not acceptable");
             System.exit(1);
         }
-        read = new BufferedReader(new FileReader( new File(fileName)));
+        r = new BufferedReader(new FileReader( new File(fileName)));
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");  
         LocalDateTime now = LocalDateTime.now();
         File tsv = new File(fileName.replace(".tsv","_"+dtf.format(now)+".tsv"));
         toTSV = new BufferedWriter(new FileWriter(tsv));
-        //readCatalog(wb);
-        read(read);
+    }
+    public String run() throws IOException {
+        read(r);
+        return "File Read Successfully";
     }
     public catalog() {
         //this is for testing methods
@@ -333,12 +335,14 @@ public class catalog {
         if (msrp == null)
             return "";
         String newMSRP = "";
-        String[] pieces = msrp.split(".", 1);
+        String[] pieces = msrp.split(".", 2);
+        System.out.println(msrp);
+        System.out.println(pieces[0]);
         newMSRP += pieces[0] + ".";
         int val = ((Integer.parseInt(pieces[1])+5)/10)*10;
         return newMSRP;
     }
-
+/*
      public static void main(String[] args) throws IOException {
         catalog wb = new catalog(args[0]);
         /*catalog wb = new catalog();
@@ -357,5 +361,5 @@ public class catalog {
         //catalog test = new catalog();
         //System.out.println(test.checkDigit("03600024147"));
         */
-    }
+
 }
