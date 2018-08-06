@@ -26,6 +26,7 @@ public class catalog {
     //following variables store column #s from the excel file
     private BufferedWriter toTSV;
     private BufferedReader r;
+    private FileInputStream file;
     private static String[] removals = {
         "AS ", "SOME ", "'", "\"", ",", "-", "_", ".",
     };
@@ -35,7 +36,7 @@ public class catalog {
     public String brand = "";
 
     public catalog(String fileName) throws IOException {
-        FileInputStream file = new FileInputStream(new File(fileName));
+        file = new FileInputStream(new File(fileName));
         if (fileName.contains("xlsx")){
             //Workbook wb = new XSSFWorkbook(file);
         } else if (fileName.contains("tsv")) {
@@ -74,29 +75,18 @@ public class catalog {
             for (int i = 0; i < row.length; i++) {
                 currentCell = row[i];
                 switch (columvals[i].toUpperCase()) {
-                    case "LENGTH":
-                        //UNCOMMENT THIS TO TEST RECEIPT ALIAS LENGTH OUTPUT
-                       // output("=if(len("+aliasRowChar+rownum+")>32, len("+aliasRowChar+rownum+"),\".\")");
-                        break;
+/*                    case "LENGTH":
+                        output("=if(len("+aliasRowChar+rownum+")>32, len("+aliasRowChar+rownum+"),\".\")");
+                        break; */
                     case "RECEIPT ALIAS":
-                        //alias = currentCell;
                         output(getReceiptAlias(currentCell, brand));
-                        //TODO: write algorithm to parse and determine the value of the new String
-                        //with the data, once correctly formatted, we could skip storing in the arraylist
-                        //and just automatically write it to the cells of a new excel file.
                         break;
                     case "UPC":
-                        //upc = getUPC(currentCell);
                         output(getUPC(currentCell));
                         break;
                     case "MSRP":
-                        //msrp = getMSRP(currentCell);
                         output(getMSRP(currentCell));
                         break;
-                    //case "BRAND":
-                        //brand = currentCell;
-
-                      //  break;
                     default :
                         output(currentCell);
                         break;
@@ -105,6 +95,8 @@ public class catalog {
             toTSV.append("\n");
             line = read.readLine();
         }
+        toTSV.close();
+        file.close();
     }
     private static Map<String, String> createMap() {
         Map<String, String> myMap = new HashMap<String, String>();
@@ -332,8 +324,9 @@ public class catalog {
     }
 
     private String getMSRP(String msrp) {
-        if (msrp == null)
-            return "";
+        //THIS METHOD IS SO MESSED UP
+        if (msrp != null)
+            return msrp;
         String newMSRP = "";
         String[] pieces = msrp.split(".", 2);
         System.out.println(msrp);
@@ -342,9 +335,10 @@ public class catalog {
         int val = ((Integer.parseInt(pieces[1])+5)/10)*10;
         return newMSRP;
     }
-/*
+
      public static void main(String[] args) throws IOException {
-        catalog wb = new catalog(args[0]);
+         catalog wb = new catalog(args[0]);
+         wb.run();
         /*catalog wb = new catalog();
 
         String value = "BROUWERIJ VERHAEGHE - ch. DUCHESSE DE BOURGOGNE FLEMISH RD 6";
@@ -361,5 +355,5 @@ public class catalog {
         //catalog test = new catalog();
         //System.out.println(test.checkDigit("03600024147"));
         */
-
+     }
 }

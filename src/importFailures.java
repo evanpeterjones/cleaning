@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
 public class importFailures {
-
     public importFailures(String fileName, String oldTSV) throws FileNotFoundException, IOException {
         ArrayList<String> upc_errors = new ArrayList<String>();
         BufferedReader input = new BufferedReader(new FileReader(new File(fileName)));
@@ -29,8 +28,8 @@ public class importFailures {
         input = new BufferedReader(new FileReader(new File(oldTSV)));
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");  
         LocalDateTime now = LocalDateTime.now();
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(oldTSV.replace(".tsv","_"+dtf.format(now)+".tsv"))));
-        PrintWriter outError = new PrintWriter(new BufferedWriter(new FileWriter("Broken_UPCS_"+oldTSV)));
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(oldTSV.replace(".tsv","_FIXED.tsv"))));
+        //PrintWriter outError = new PrintWriter(new BufferedWriter(new FileWriter(new File("Broken_UPCS_"+oldTSV))));
         String currentIndex;
         while ((currentLine = input.readLine()) != null) {
             currentIndex = currentLine.split("\t")[0];
@@ -39,15 +38,14 @@ public class importFailures {
             } else {
                 out.print(currentLine.toUpperCase()+"\n"); 
             }
-
         }
         //idea is that it will read file copied from ecoportal,
         //and loop through original file, a new file is created to fill
         //with the UPCs with incorrect info to be checked an imported separarately.
     }
-
+/*
     public static void main(String[] args) throws FileNotFoundException, IOException {
         importFailures n = new importFailures(args[0], args[1]);
     }
-
+*/
 }
