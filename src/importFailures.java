@@ -16,9 +16,10 @@ public class importFailures {
             currentLine = input.readLine();
             //read line twice to accomodate the extra line
             //upc_errors.append(currentLine.)
-            upc_errors.add((currentLine.replaceAll("^[a-zA-Z ]+","").replaceAll("[a-z A-Z.-]+", "")));
+            upc_errors.add(currentLine.replaceAll("[a-z A-Z.-]+", ""));
         }
-        if (upc_errors.get(0) != null) {
+        System.out.println(upc_errors.isEmpty() ? " Empty " : upc_errors.get(0));
+        if (!upc_errors.isEmpty()) {
             System.out.println("Successfully read UPCS, creating new file...");
         } else {
             System.out.println("Error reading UPCs, program exited...");
@@ -43,9 +44,9 @@ public class importFailures {
         //and loop through original file, a new file is created to fill
         //with the UPCs with incorrect info to be checked an imported separarately.
     }
-/*
+
     public static void main(String[] args) throws FileNotFoundException, IOException {
         importFailures n = new importFailures(args[0], args[1]);
     }
-*/
+
 }

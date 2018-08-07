@@ -27,6 +27,7 @@ public class catalog {
     private BufferedWriter toTSV;
     private BufferedReader r;
     private FileInputStream file;
+    private File tsv;
     private static String[] removals = {
         "AS ", "SOME ", "'", "\"", ",", "-", "_", ".",
     };
@@ -34,6 +35,11 @@ public class catalog {
     public String upc = "";
     public String msrp = "";
     public String brand = "";
+    private boolean isOrganic = false;
+
+    public String getFilePath() {
+        return tsv.getPath();
+    }
 
     public catalog(String fileName) throws IOException {
         file = new FileInputStream(new File(fileName));
@@ -48,25 +54,23 @@ public class catalog {
         r = new BufferedReader(new FileReader( new File(fileName)));
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");  
         LocalDateTime now = LocalDateTime.now();
-        File tsv = new File(fileName.replace(".tsv","_"+dtf.format(now)+".tsv"));
+        tsv = new File(fileName.replace(".tsv","_"+dtf.format(now)+".tsv"));
         toTSV = new BufferedWriter(new FileWriter(tsv));
     }
     public String run() throws IOException {
         read(r);
-        return "File Read Successfully";
+        return getFilePath();
     }
     public catalog() {
-        //this is for testing methods
-        //remove this;
+        //empty to fix initialization error in GUI
     }
     public void read(BufferedReader read) throws IOException {
-        String line = read.readLine();
-        toTSV.append(line.replace("length\t","")+"\n");
+        String line = read.readLine()+"\tORGANIC\n";
+        toTSV.append(line.replace("length\t",""));
         String columvals[] = line.split("\t");
         line = read.readLine();
         String row[];
         String currentCell = "";
-        char aliasRowChar = (char)(Arrays.asList(columvals).indexOf("RECEIPT ALIAS")+65);
         int rownum = 0;
 
         while (line != null) {
@@ -75,9 +79,9 @@ public class catalog {
             for (int i = 0; i < row.length; i++) {
                 currentCell = row[i];
                 switch (columvals[i].toUpperCase()) {
-/*                    case "LENGTH":
-                        output("=if(len("+aliasRowChar+rownum+")>32, len("+aliasRowChar+rownum+"),\".\")");
-                        break; */
+                    case "LENGTH":
+                       // output("=if(len("+aliasRowChar+rownum+")>32, len("+aliasRowChar+rownum+"),\".\")");
+                        break;
                     case "RECEIPT ALIAS":
                         output(getReceiptAlias(currentCell, brand));
                         break;
@@ -86,6 +90,11 @@ public class catalog {
                         break;
                     case "MSRP":
                         output(getMSRP(currentCell));
+                        break;
+                    case "ORGANIC":
+                        String val = isOrganic ? "TRUE" : "FALSE";
+                        output(val);
+                        isOrganic = false;
                         break;
                     default :
                         output(currentCell);
@@ -276,8 +285,9 @@ public class catalog {
      * @param cellValue
      */
     private String getReceiptAlias(String cellValue, String brand) {
-        if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z ]",""); }
         String newString = "";
+        isOrganic = cellValue.contains(" ORG");
+        if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z ]",""); }
         String[] parsed = cellValue.toUpperCase().split(" ");
         int NUM_REMOVE = cellValue.length() - 32;
         int track = NUM_REMOVE;
@@ -324,29 +334,38 @@ public class catalog {
     }
 
     private String getMSRP(String msrp) {
-        //THIS METHOD IS SO MESSED UP
-        if (msrp != null)
-            return msrp;
-        String newMSRP = "";
-        String[] pieces = msrp.split(".", 2);
-        System.out.println(msrp);
-        System.out.println(pieces[0]);
-        newMSRP += pieces[0] + ".";
-        int val = ((Integer.parseInt(pieces[1])+5)/10)*10;
-        return newMSRP;
+        //THIS METHOD IS SO UNDREADABLE
+        if (msrp.length() == 0)
+            return "";
+        String[] pieces = msrp.split("\\.", 2);
+        String newstr= "";
+        switch(pieces.length) {
+            case 0 :
+                return "";
+            case 1 :
+                newstr = pieces[0].substring(0,pieces[0].length()-1)+""+((char)(pieces[0].charAt(pieces[0].length()-1)-1));
+                return newstr + ".99";
+            case 2:
+                return pieces[0] + "." + (((Integer.parseInt(pieces[1])+5)/10)-1)+"9";
+        }
+        return "";
     }
-
+}
+/*
      public static void main(String[] args) throws IOException {
-         catalog wb = new catalog(args[0]);
-         wb.run();
-        /*catalog wb = new catalog();
+         catalog wb = new catalog();
+         System.out.println(wb.getMSRP("12"));
+         System.out.println(wb.getMSRP("13"));
+         System.out.println(wb.getMSRP("26.24"));
+         System.out.println(wb.getMSRP("26.23"));
+         catalog wb = new catalog();
 
         String value = "BROUWERIJ VERHAEGHE - ch. DUCHESSE DE BOURGOGNE FLEMISH RD 6";
         String a = wb.getReceiptAlias(value, "test");
         System.out.println(a + " " + a.length());
         
         // TESTING
-         /*
+
         String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
         String ret = wb.getReceiptAlias(test, "JACKSON");
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
@@ -354,6 +373,6 @@ public class catalog {
 
         //catalog test = new catalog();
         //System.out.println(test.checkDigit("03600024147"));
-        */
-     }
-}
+
+    }*/
+

@@ -11,12 +11,15 @@ import javafx.scene.image.Image;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.*;
 
 public class catalogUI extends Application {
+    String newFilePath;
     @Override
     public void start(Stage primaryStage) {
         Label title = new Label("File (tsv only):");
@@ -30,6 +33,10 @@ public class catalogUI extends Application {
         fix.setText("Remove Errors");
         input.setText("Error File Directory");
         VBox b = new VBox();
+        VBox updatePanel = new VBox();
+        Label errors = new Label("...sweep away");
+
+        updatePanel.getChildren().add(errors);
         b.getChildren().addAll(title,txt, btn);
         txt.setOnDragOver(new EventHandler<DragEvent>(){
             @Override
@@ -79,34 +86,49 @@ public class catalogUI extends Application {
                 event.consume();
             }
         });
-        fix.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                try {
-                    importFailures k = new importFailures(txt.getText(), input.getText());
-                } catch (IOException e) {
-                    System.err.println("Caught IOException: " + e);
-                }
-            }
-        });
+        //button linked to "b" for catalog file input
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 try {
                     catalog k = new catalog(txt.getText());
-                    System.out.println(k.run());
+                    newFilePath = k.run();
+                    setFilePath(k.getFilePath());
+                    errors.setText("File created at: " + newFilePath);
                     b.getChildren().addAll(l, input, fix);
                 } catch (IOException e) {
-                    System.err.println("Caught IOException: " + e);
+                    errors.setText("Caught IOException: " + e);
                 }
             }
         });
-        StackPane root = new StackPane();
-        root.getChildren().add(b);
+        //button linked to "input" for error file
+        fix.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    if (newFilePath != null) {
+                        importFailures temp = new importFailures(input.getText(), newFilePath);
+                        errors.setText("UPCs Successfully Removed");
+                    } else {
+                        errors.setText("Formatted catalog directory lost");
+                    }
+                } catch (Exception e) {
+                    errors.setText("Caught Exception: " + e);
+                }
+            }
+        });
+        BorderPane root = new BorderPane();
+        root.setPadding(new Insets(10));
+        root.setCenter(b);
+        root.setBottom(updatePanel);
         primaryStage.getIcons().add(new Image("ecrs.png"));
         primaryStage.setTitle("ECRS Catalog Sweeper");
         primaryStage.setScene(new Scene(root, 300, 350));
         primaryStage.show();
+
+    }
+    private void setFilePath(String path) {
+        newFilePath = path;
     }
     public static void main(String[] args) {
         launch(args);
