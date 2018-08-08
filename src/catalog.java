@@ -9,7 +9,7 @@ package src;
  * @version 0.9.1
  * @author Evan Jones
  *
- */
+ **/
 import java.util.*;
 import java.util.Scanner;
 import java.io.*;
@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.time.format.DateTimeFormatter;  
 import java.time.LocalDateTime;
+import java.util.Arrays.*;
 
 public class catalog {
     private String filePath;
@@ -65,13 +66,14 @@ public class catalog {
         //empty to fix initialization error in GUI
     }
     public void read(BufferedReader read) throws IOException {
-        String line = read.readLine()+"\tORGANIC\n";
+        String line = read.readLine() + "\n";
         toTSV.append(line.replace("length\t",""));
         String columvals[] = line.split("\t");
         line = read.readLine();
-        String row[];
+        String[] row = new String[columvals.length];
         String currentCell = "";
         int rownum = 0;
+        String val = "";
 
         while (line != null) {
             row = line.split("\t");
@@ -91,8 +93,8 @@ public class catalog {
                     case "MSRP":
                         output(getMSRP(currentCell));
                         break;
-                    case "ORGANIC":
-                        String val = isOrganic ? "TRUE" : "FALSE";
+                    case "ORGANIC\n":
+                        val = isOrganic ? "TRUE" : "FALSE";
                         output(val);
                         isOrganic = false;
                         break;

@@ -30,16 +30,19 @@ public class importFailures {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");  
         LocalDateTime now = LocalDateTime.now();
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(oldTSV.replace(".tsv","_FIXED.tsv"))));
-        //PrintWriter outError = new PrintWriter(new BufferedWriter(new FileWriter(new File("Broken_UPCS_"+oldTSV))));
+        PrintWriter err = new PrintWriter(new BufferedWriter(new FileWriter(oldTSV.replace(".tsv","_REMOVED.txt"))));
+        err.print("UPCs Removed From File "+oldTSV +"\r\n");
         String currentIndex;
         while ((currentLine = input.readLine()) != null) {
             currentIndex = currentLine.split("\t")[0];
             if (upc_errors.contains(currentIndex)){
-                System.out.println("damn " + currentIndex);                    
+                err.println(currentIndex.toUpperCase());
             } else {
-                out.print(currentLine.toUpperCase()+"\n"); 
+                out.print(currentLine.toUpperCase()+"\r\n");
             }
         }
+        err.close();
+        out.close();
         //idea is that it will read file copied from ecoportal,
         //and loop through original file, a new file is created to fill
         //with the UPCs with incorrect info to be checked an imported separarately.

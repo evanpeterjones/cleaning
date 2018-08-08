@@ -108,7 +108,7 @@ public class catalogUI extends Application {
                 try {
                     if (newFilePath != null) {
                         importFailures temp = new importFailures(input.getText(), newFilePath);
-                        errors.setText("UPCs Successfully Removed");
+                        errors.setText("UPCs Successfully Removed: " + newFilePath.replace(".tsv","_FIXED.tsv"));
                     } else {
                         errors.setText("Formatted catalog directory lost");
                     }
@@ -125,7 +125,6 @@ public class catalogUI extends Application {
         primaryStage.setTitle("ECRS Catalog Sweeper");
         primaryStage.setScene(new Scene(root, 300, 350));
         primaryStage.show();
-
     }
     private void setFilePath(String path) {
         newFilePath = path;
