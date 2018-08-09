@@ -334,6 +334,7 @@ public class catalog {
                 int numRemoved = 0;
                 for (String ch : chars) {
                     int v = temp.lastIndexOf(ch);
+                    //excludes first and last character
                     if (v > 0 && v < temp.length()-1 && NUM_REMOVE > 0) {
                         temp = temp.substring(0,v) + (temp.substring(v+1, temp.length()));
                         numRemoved++;
@@ -377,16 +378,10 @@ public class catalog {
 
      public static void main(String[] args) throws IOException {
          catalog wb = new catalog();
-         System.out.println(wb.getMSRP("122"));
-         System.out.println(wb.getMSRP("123.7"));
-         System.out.println(wb.getMSRP("26.25"));
-         System.out.println(wb.getMSRP("26.24"));
-         System.out.println(wb.getMSRP("26.00"));
-         System.out.println(wb.getMSRP("26.2367"));
+         System.out.println(wb.getMSRP("11.04"));
+         System.out.println(wb.getMSRP("11.06"));
 
-        String test = "BROUWERIJ VERHAEGHE ORG DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-	    test = "-)(*& test &*(& test";
-	    test = "and so and asdf asd fa sdf a once unsweetened";
+        String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
         String ret = wb.getReceiptAlias(test, "asdfasdf");
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
         System.out.println("End Phrase: " + ret.length() + "\n" + ret);
