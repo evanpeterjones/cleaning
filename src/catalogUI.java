@@ -22,7 +22,7 @@ public class catalogUI extends Application {
     String newFilePath;
     @Override
     public void start(Stage primaryStage) {
-        Label title = new Label("File (tsv only):");
+        Label title = new Label("Catalog File (tsv only):");
         Button btn = new Button();
         TextField txt = new TextField();
         Button fix = new Button();

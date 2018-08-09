@@ -4,9 +4,8 @@ package src;
  *
  *  This is a program that reads excel files and converts the data so
  *  they are ready for import to the Universal Product Database.
- *  The name should be read like "catapult", but catalog, lol!!
  *
- * @version 0.9.1
+ * @version 0.9.1 ?
  * @author Evan Jones
  *
  **/
@@ -16,7 +15,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.time.format.DateTimeFormatter;  
+import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -66,7 +65,8 @@ public class catalog {
         //empty to fix initialization error in GUI
     }
     public void read(BufferedReader read) throws IOException {
-        String line = read.readLine() + "\n";
+        String line = read.readLine();
+        line += line.contains("RECEIPT ALIAS") ? "" : "RECEIPT ALIASES\n";
         toTSV.append(line.replace("length\t",""));
         String columvals[] = line.split("\t");
         line = read.readLine();
@@ -83,6 +83,13 @@ public class catalog {
                 switch (columvals[i].toUpperCase()) {
                     case "LENGTH":
                        // output("=if(len("+aliasRowChar+rownum+")>32, len("+aliasRowChar+rownum+"),\".\")");
+                        break;
+                    case "ITEM NAME":
+                        output(currentCell);
+                        //if there's no receipt alias line assume the item name
+                        if (!Arrays.asList(columvals).contains("RECEIPT ALIAS")) {
+                            output(getReceiptAlias(currentCell,brand));
+                        }
                         break;
                     case "RECEIPT ALIAS":
                         output(getReceiptAlias(currentCell, brand));
@@ -115,7 +122,7 @@ public class catalog {
         myMap.put("AS ", "");myMap.put("SOME ", "");myMap.put("ZERO ", "0 ");myMap.put("ONE ", "1 ");
         myMap.put("TWO ", "2 ");myMap.put("THREE ", "3 ");myMap.put("FOUR ", "4 ");myMap.put("FIVE ", "5 ");
         myMap.put("SIX ", "6 ");myMap.put("SEVEN ", "7 ");myMap.put("EIGHT ", "8 ");myMap.put("NINE ", "9 ");
-        myMap.put("ULTRA ", "ULT ");myMap.put("ANTI-OXIDANT ", "ANTI-OXI ");myMap.put("UNSWEETENED ", "UNSWTND ");
+        myMap.put("ULTRA ", "ULT ");myMap.put("ANTI-OXIDANT ", "ANTI-OXI ");//myMap.put("UNSWEETENED ", "UNSWTND ");
         myMap.put("UNSWTND ", "UNSWT ");myMap.put("GRAPEFRUIT ", "GRPFRUT");myMap.put("GRPFRUT ", "GRPFRT");
         myMap.put("CALCIUM ", "CLCM ");myMap.put("POTASSIUM ", "POTASSM ");myMap.put("POTASSM ", "POTASM ");
         myMap.put("MAGNESIUM ", "MAGN ");myMap.put("MAGN ", "MGN ");myMap.put("REDUCED ", "REDUX ");
@@ -127,7 +134,7 @@ public class catalog {
         myMap.put("TWICE ", "2");myMap.put("DOUBLE ", "DBL ");myMap.put("METABOLISM ", "METABLSM ");myMap.put("METABLSM ", "MTBLSM");
         myMap.put("ARGAN ", "ARGN ");myMap.put("ARGN ", "ARG ");myMap.put("FACIAL ", "FACL ");myMap.put("FACL ", "FAC ");
         myMap.put("TREATMENT ", "TRTMNT ");myMap.put("CHAMOMILE ", "CHAM ");myMap.put("SUSTAINED ", "SUST ");
-        myMap.put("RELEASE ", "REL ");myMap.put("DE ", "");
+        myMap.put("RELEASE ", "REL ");
 
         return myMap;
     }
@@ -196,6 +203,14 @@ public class catalog {
         toTSV.append(append+"\t");
     }
 
+    private String removeLead(String start) {
+        for (int stInd = 0; stInd < start.length(); stInd++) {
+            if (start.charAt(stInd) != '0') {
+                return start.substring(stInd, start.length());
+            }
+        }
+        return start;
+    }
     /** getUPC(String)
      *
      *  ensures each UPC is at least 12 digits and adds the check digit
@@ -204,8 +219,7 @@ public class catalog {
      * @return
      */
     private String getUPC(String theUPC) {
-        String UPC = (theUPC.charAt(0) == '0' && theUPC.length() == 12) ? (theUPC.substring(theUPC.length() - 11,
-                theUPC.length())) : theUPC;
+        String UPC = (theUPC.charAt(0) == '0' && theUPC.length() == 12) ? removeLead(theUPC) : theUPC;
         String newUPC = "";
         switch (UPC.length()) {
             case 11:
@@ -232,7 +246,7 @@ public class catalog {
      * @return checkDigChar
      */
     private char checkDigit(String UPC) {
-        if (UPC.length() != 11) { System.out.println("ERROR, UPC LENGTH"); }
+        if (UPC.length() != 11) { System.out.println("ERROR, UPC LENGTH"); System.exit(1); }
         char checkDigChar;
         int odd = 0;
         int even = 0;
@@ -291,9 +305,11 @@ public class catalog {
 	//isOrganic = cellValue.contains(" ORG");
         if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z ]",""); }
         String[] parsed = cellValue.toUpperCase().split(" ");
+        //number of characters to remove
         int NUM_REMOVE = cellValue.length() - 32;
+        //running count of how many we HAVE removed
         int numActRemoved = 0;
-        String[] chars = {"A","E","I","O","U"};
+        String[] chars = {"I","A","O","U","E"};
         /*
         oh god, this is a mess, please simplify this so it's legible
         */
@@ -312,7 +328,7 @@ public class catalog {
                // System.out.println("Hashmap is working! Saved " + fromAlias.length() + " many characters!!");
                 continue;
             }
-            //otherwise this fucking mess... remove vowels? ?
+            //otherwise this mess... remove vowels ?
             else {
                 String temp = sub;
                 int numRemoved = 0;
@@ -338,23 +354,25 @@ public class catalog {
         //THIS METHOD IS SO UNDREADABLE
         if (msrp.length() == 0)
             return "";
-        String[] pieces = msrp.split("\\.", 2);
+        String[] pieces = msrp.split("\\.");
         String newstr= "";
         switch(pieces.length) {
-            case 0 :
-                return "";
             case 1 :
+                // if MSRP is an integer value
+                //($125) 12                                              (5-1)
                 newstr = pieces[0].substring(0,pieces[0].length()-1)+""+((char)(pieces[0].charAt(pieces[0].length()-1)-1));
+                //     124       .99
                 return newstr + ".99";
             case 2:
-		newstr = pieces[0] + ".";
-		//accounts for cases where msrp decimal is incomplete "12.7"
-		newstr += (pieces[1].length()==2) ?
-		    (((Integer.parseInt(pieces[1])+5)/10)-1)+"9":
-		    ((((Integer.parseInt(pieces[1])*10)+5)/10)-1)+"9";
+                newstr = pieces[0] + ".";
+                //accounts for cases where msrp decimal is incomplete "12.7"
+                newstr += (pieces[1].length()==2 && pieces[1].charAt(0) != '0') ?
+                        (((Integer.parseInt(pieces[1].substring(0,2))+5)/10)-1)+"9":
+                        ((((Integer.parseInt(pieces[1])*10)+5)/10)-1)+"9";
                 return newstr;
+            default :
+                return "";
         }
-        return "";
     }
 
      public static void main(String[] args) throws IOException {
@@ -363,9 +381,12 @@ public class catalog {
          System.out.println(wb.getMSRP("123.7"));
          System.out.println(wb.getMSRP("26.25"));
          System.out.println(wb.getMSRP("26.24"));
-	 
+         System.out.println(wb.getMSRP("26.00"));
+         System.out.println(wb.getMSRP("26.2367"));
+
         String test = "BROUWERIJ VERHAEGHE ORG DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-	test = "-)(*& test &*(& test";
+	    test = "-)(*& test &*(& test";
+	    test = "and so and asdf asd fa sdf a once unsweetened";
         String ret = wb.getReceiptAlias(test, "asdfasdf");
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
         System.out.println("End Phrase: " + ret.length() + "\n" + ret);
