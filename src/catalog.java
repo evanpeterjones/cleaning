@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.time.format.DateTimeFormatter;  
 import java.time.LocalDateTime;
-import java.util.Arrays.*;
+import java.util.Arrays;
 
 public class catalog {
     private String filePath;
@@ -288,11 +288,10 @@ public class catalog {
      */
     private String getReceiptAlias(String cellValue, String brand) {
         String newString = "";
-        isOrganic = cellValue.contains(" ORG");
+	//isOrganic = cellValue.contains(" ORG");
         if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z ]",""); }
         String[] parsed = cellValue.toUpperCase().split(" ");
         int NUM_REMOVE = cellValue.length() - 32;
-        int track = NUM_REMOVE;
         int numActRemoved = 0;
         String[] chars = {"A","E","I","O","U"};
         /*
@@ -348,33 +347,31 @@ public class catalog {
                 newstr = pieces[0].substring(0,pieces[0].length()-1)+""+((char)(pieces[0].charAt(pieces[0].length()-1)-1));
                 return newstr + ".99";
             case 2:
-                return pieces[0] + "." + (((Integer.parseInt(pieces[1])+5)/10)-1)+"9";
+		newstr = pieces[0] + ".";
+		//accounts for cases where msrp decimal is incomplete "12.7"
+		newstr += (pieces[1].length()==2) ?
+		    (((Integer.parseInt(pieces[1])+5)/10)-1)+"9":
+		    ((((Integer.parseInt(pieces[1])*10)+5)/10)-1)+"9";
+                return newstr;
         }
         return "";
     }
-}
-/*
+
      public static void main(String[] args) throws IOException {
          catalog wb = new catalog();
-         System.out.println(wb.getMSRP("12"));
-         System.out.println(wb.getMSRP("13"));
+         System.out.println(wb.getMSRP("122"));
+         System.out.println(wb.getMSRP("123.7"));
+         System.out.println(wb.getMSRP("26.25"));
          System.out.println(wb.getMSRP("26.24"));
-         System.out.println(wb.getMSRP("26.23"));
-         catalog wb = new catalog();
-
-        String value = "BROUWERIJ VERHAEGHE - ch. DUCHESSE DE BOURGOGNE FLEMISH RD 6";
-        String a = wb.getReceiptAlias(value, "test");
-        System.out.println(a + " " + a.length());
-        
-        // TESTING
-
-        String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-        String ret = wb.getReceiptAlias(test, "JACKSON");
+	 
+        String test = "BROUWERIJ VERHAEGHE ORG DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
+	test = "-)(*& test &*(& test";
+        String ret = wb.getReceiptAlias(test, "asdfasdf");
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
         System.out.println("End Phrase: " + ret.length() + "\n" + ret);
 
         //catalog test = new catalog();
         //System.out.println(test.checkDigit("03600024147"));
 
-    }*/
-
+    }
+}
