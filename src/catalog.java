@@ -1,5 +1,3 @@
-package src;
-
 /** the Cata-log Program
  *
  *  This is a program that reads excel files and converts the data so
@@ -9,6 +7,9 @@ package src;
  * @author Evan Jones
  *
  **/
+
+package src;
+
 import java.util.*;
 import java.util.Scanner;
 import java.io.*;
@@ -64,45 +65,14 @@ public class catalog {
         String line = read.readLine();
         //TODO: add method to use item name if no receipt alias and add column
         //in Row class we can define a method to run item name and add this 
-        toTSV.append(line.toUpperCase().replace("LENGTH\t",""));
-        String columvals[] = line.split("\t");
+        toTSV.append(line.toUpperCase().replace("LENGTH\t","")+"\r\n");
+        List<String> cv = Arrays.asList(line.split("\t"));
+
         line = read.readLine();
-        int rownum = 1;
-
         while (line != null) {
-            row currentRow = new row(line.split("\t"), columnvals);
-
-            for (String cell : columnvals) {
-                switch (cell) {
-                    case "LENGTH": break;
-                    case "ITEM NAME":
-                        output(currentCell);
-                        //if there's no receipt alias line assume the item name
-                        if (!Arrays.asList(columvals).contains("RECEIPT ALIAS")) {
-                            output(getReceiptAlias(currentCell, brand));
-                        }
-                        break;
-                    case "RECEIPT ALIAS":
-                        output(getReceiptAlias(currentCell, brand));
-                        break;
-                    case "UPC":
-                        output(getUPC(currentCell));
-                        break;
-                    case "MSRP":
-                        output(getMSRP(currentCell));
-                        break;
-                    case "ORGANIC\n":
-                        output(isOrganic ? "TRUE" : "FALSE");
-                        isOrganic = false;
-                        break;
-                    default:
-                        output(currentCell);
-                        break;
-                }
-            }
+            row currentRow = new row(line.split("\t"), cv);
             output(currentRow.getLine());
             line = read.readLine();
-            rownum++;
         }
         toTSV.close();
         file.close();
@@ -170,19 +140,5 @@ public class catalog {
      */
     private void output(String append) throws IOException {
         toTSV.append(append+"\r\n");
-    }
-    public static void main(String[] args) throws IOException {
-        catalog wb = new catalog();
-        System.out.println(wb.getMSRP("11.43"));
-        System.out.println(wb.getMSRP("11.65"));
-
-        String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-        String ret = wb.getReceiptAlias(test, "asdfasdf");
-        System.out.println("Start Phrase: " + test.length() + "\n" + test);
-        System.out.println("End Phrase: " + ret.length() + "\n" + ret);
-
-        //catalog test = new catalog();
-        //System.out.println(test.checkDigit("03600024147"));
-
     }
 }

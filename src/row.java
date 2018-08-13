@@ -17,27 +17,28 @@ public class row {
     private String alias = "";
     private String msrp = "";
     private String brand = "";
-    private String default = "";
+    private String def = "";
     private boolean isOrganic = false;
-    private static String[] readOrder = {
-        "UPC","MSRP","BRAND","ITEM NAME","RECEIPT ALIAS"
-    }
     private static final Map<String, String> aliases = createMap();
     private String line = ""; //to be returned
 
+    public row() {
+        //just to test
+    }
     /** row
      * Constructor 
      * 
      * @param ORIGINAL String[] column values parsed by '\t'
      * @param columnNames String[] column name order
      */
-    public row(String[] ORIGINAL, String[] columnNames) {        
-        list c = Arrays.asList(columnvals);        
+    public row(String[] ORIGINAL, List<String> columnNames) {                
         String currentCell = "";
-        for (String cell : columnvals) {
-            currentCell = ORIGINAL[c.indexOf(cell)];                
+        for (String cell : columnNames) {
+            currentCell = ORIGINAL[columnNames.indexOf(cell)];                
             switch (cell) {
                 case "LENGTH": break;
+                case "BRAND":
+                    brand = currentCell;
                 case "ITEM NAME":
                     item = currentCell;    
                     break;
@@ -52,14 +53,47 @@ public class row {
                     msrp = getMSRP(currentCell);
                     break;
                 default:
-                    default += currentCell+"\t";
+                    def += currentCell+"\t";
+                    break;
+            }
+        }
+        createLine(columnNames);
+    }
+
+    public void createLine(List<String> order) {
+        String[] unchanged = def.split("\t");  
+        int len = unchanged.length;
+        int default_index = 0;
+        for (String cell : order) {
+            switch (cell) {
+                case "LENGTH": break;
+                case "BRAND" :  
+                    line += brand+"\t";
+                    break;
+                case "UPC":
+                    line += upc+"\t";
+                    break;
+                case "MSRP":
+                    line += msrp+"\t";
+                    break;
+                case "RECEIPT ALIAS":
+                    line += alias+"\t";
+                    break;
+                case "ITEM NAME":
+                    line += item+"\t";
+                    break;
+                default:
+                    //System.out.print(default_index+" ");
+                    if (default_index<len)
+                        line += unchanged[default_index]+"\t";
+                    default_index++;
                     break;
             }
         }
     }
 
     /** createMap
-     *  may be replaced with an enum
+     *  <?> replace with an enum <?>
      */
     private static Map<String, String> createMap() {
         Map<String, String> myMap = new HashMap<String, String>();
@@ -116,7 +150,7 @@ public class row {
                     newUPC = UPC;
                 }
         }
-        upc = newUPC;
+        return newUPC;
     }
 
     /** checkDigit(String)
@@ -183,11 +217,14 @@ public class row {
      *
      * @param cellValue
      */
-    private String getReceiptAlias(String cellValue, String brand) {
+    private String getReceiptAlias(String cellValue) {
+        isOrganic = cellValue.contains(" ORG");
         String newString = "";
-	//isOrganic = cellValue.contains(" ORG");
         if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z\\. ]",""); }
-        String[] parsed = cellValue.toUpperCase().split(" ");
+        System.out.println(isOrganic?"ORGANIC":"NOT ORGANIC");
+
+        cellValue = cellValue.contains(brand) ? cellValue.replace(brand+" ", "") : cellValue;
+        String[] parsed = cellValue.toUpperCase().replaceAll("[^0-9A-Za-z\\. ]","").split(" ");
         //number of characters to remove
         int NUM_REMOVE = cellValue.length() - 32;
         //running count of how many we HAVE removed
@@ -200,7 +237,6 @@ public class row {
         for (int i = 0; i < parsed.length; i++) {
             String sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
             //if substring is the brand, skip concatenating it
-            if (sub.equals(brand)) { NUM_REMOVE -= brand.length(); continue; }
             //regex to fix year
             if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
             //if substring already has an alias, concatenate that and continue
@@ -233,6 +269,7 @@ public class row {
         }
         return newString.replaceAll("[^a-zA-Z0-9 ]", "").replaceAll("  "," ");
     }
+    private void setBrand(String a) { this.brand = a; }
 
     private String getMSRP(String msrp) {
         //THIS METHOD IS SO UNDREADABLE
@@ -260,8 +297,27 @@ public class row {
     }
 
     public String getLine() {
-        // create line based on values stored
-        // **line doesn't need a \r\n character, that's done later
         return line;
+    }
+
+    public static void main(String[] args) throws IOException {
+        row wb = new row();
+       /* System.out.println(wb.getMSRP("11.43"));
+        System.out.println(wb.getMSRP("11.65"));
+*/
+        wb.setBrand("BROUWERIJ VERHAEGHE");
+        String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
+        String ret = wb.getReceiptAlias(test);
+        System.out.println("Start Phrase: " + test.length() + "\n" + test);
+        System.out.println("End Phrase: " + ret.length() + "\n" + ret);
+
+        String the = "071537075403	POLAR	4.12	1007540	POLAR	EA	1	CARBO	3GJ	WATER	CARB	POL PURIFIED 3GAL CARBOY	POL PURIFIED 3GAL CARBOY	071537075403	071537075403	4.12";
+        String tst = "UPC	BRAND	COST EACH	SUID	VENDOR	UOM	CASE PK	SIZE	PACK SIZE	Category	FLAVOR	ITEM NAME	RECEIPT ALIAS	UNITUPC	CASEUPC	CASE PRICE";
+        row t = new row(the.split("\t"), Arrays.asList(tst.split("\t")));
+        System.out.println("\n"+t.def);
+        System.out.println(t.getLine());
+        //catalog test = new catalog();
+        //System.out.println(test.checkDigit("03600024147"));
+
     }
 }

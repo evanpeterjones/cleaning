@@ -95,7 +95,6 @@ public class catalogUI extends Application {
                     newFilePath = k.run();
                     setFilePath(k.getFilePath());
                     errors.setText("File created at: " + newFilePath);
-                    b.getChildren().addAll(l, input, fix);
                 } catch (IOException e) {
                     errors.setText("Caught IOException: " + e);
                 }
@@ -121,6 +120,7 @@ public class catalogUI extends Application {
         root.setPadding(new Insets(10));
         root.setCenter(b);
         root.setBottom(updatePanel);
+        b.getChildren().addAll(l, input, fix);
         primaryStage.getIcons().add(new Image("ecrs.png"));
         primaryStage.setTitle("ECRS Catalog Sweeper");
         primaryStage.setScene(new Scene(root, 300, 350));
