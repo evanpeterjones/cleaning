@@ -92,7 +92,6 @@ public class catalogUI extends Application {
             public void handle(ActionEvent event) {
                 try {
                     catalog k = new catalog(txt.getText());
-                    newFilePath = k.run();
                     setFilePath(k.getFilePath());
                     errors.setText("File created at: " + newFilePath);
                 } catch (IOException e) {
