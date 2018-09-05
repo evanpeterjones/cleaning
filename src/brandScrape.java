@@ -2,11 +2,12 @@ package src;
 
 import com.jaunt.*;
 import java.util.ArrayList;
+//import com.gargoylesoftware.htmlunit.*;
 
 public class brandScrape
 {
     private String du = "https://duckduckgo.com/?q=";
-    private String ck = "&t=hi&ia=web";
+    private String ck = "&t=hi&ia=web";//&atb=v127-6ba&ia=answer
     private String userAgent = "";
     private String upc = "";
     private String brand = "";
@@ -15,37 +16,35 @@ public class brandScrape
 
     public brandScrape(String upc)
     {
-        this.upc=upc;
-        userAgent = new RandomUserAgent().getRandomUserAgent();
+        this.upc=upc;    
     }
 
-    public String runAndReturn()
+    public String runAndReturn() throws Exception
     {
-        try
-        {
-            UserAgent s = new UserAgent();
-            s.visit(du + upc + ck);
-            System.out.println(s.doc.innerHTML());
-            // complete a duck_duck_go search and create array of url links ?/maybe store each description to compare?
-            // loop through array
-        } catch (JauntException e)
-        {
-            System.err.println("Error: " + e);
-        }
-
-        return brand;
+        return "";
+        //return s.doc.innerHTML();
+        /*
+        UserAgent userAgent = new UserAgent();      //create new userAgent (headless browser)
+        userAgent.visit("http://google.com");       //visit google
+        userAgent.doc.apply("butterflies");         //apply form input (starting at first editable field)
+        userAgent.doc.submit("Google Search");      //click submit button labelled "Google Search"
+        
+        Elements links = userAgent.doc.findEvery("<h3 class=r>").findEvery("<a>");   //find search result links 
+        for(Element link : links) System.out.println(link.getAt("href"));
+        // complete a duck_duck_go search and create array of url links ?/maybe store each description to compare?
+        // loop through array*/
+     
     }
 
-    private void duck()
+    public static void main(String[] args) throws Exception
     {
-        String url = "";
-        //search duck duck go, and append urls to array
-        links.append();
-    }
-
-    public static void main(String[] args)
-    {
-        brandScrape foo = new brandScrape(args[0]);
-        System.out.println(foo.runAndReturn());
+        //brandScrape foo = new brandScrape(args[0]);
+        UserAgent s = new UserAgent();
+        s.settings.autoSaveAsHTML = true;
+        //s.visit(du + upc + ck);
+        s.visit("https://duckduckgo.com");
+        //s.doc.apply( args[0] );
+        //s.doc.submit("search__button");
+        System.out.println(s.doc.innerHTML());
     }
 }
