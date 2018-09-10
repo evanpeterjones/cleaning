@@ -19,6 +19,7 @@ import java.util.Map;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+/*
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 
@@ -51,12 +52,12 @@ public class catalog
             LocalDateTime now = LocalDateTime.now();
             if (fileName.contains("xlsx"))
             {
-                readXLSX( new XSSFWorkbook( new File(fileName)));
+                //readXLSX( new XSSFWorkbook( new File(fileName)));
             } 
             else if (fileName.contains("tsv")) 
             {
                 read = new BufferedReader( new FileReader( new File(fileName)));       
-                readTSV();
+                //readTSV();
             } 
             else 
             {
@@ -71,6 +72,7 @@ public class catalog
             line = read.readLine();
             cv = Arrays.asList(line.split("\t"));
             toTSV.append(line.toUpperCase().replace("LENGTH\t","")+"\r\n");
+            readTSV();
         } 
         catch (Exception e)
         {
@@ -94,6 +96,7 @@ public class catalog
             line = read.readLine();
         }
         toTSV.close();
+        read.close();
         filePath = getFilePath();
     }
     /** readXLSX
@@ -105,7 +108,7 @@ public class catalog
      * @param book
      * 
      */
-
+/*
     private void readXLSX(XSSFWorkbook book) throws IOException 
     {
         //sheet = book.getSheetAt(0);

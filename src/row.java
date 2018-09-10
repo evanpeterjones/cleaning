@@ -39,12 +39,19 @@ public class row {
                 case "LENGTH": break;
                 case "BRAND":
                     brand = currentCell;
+                    //once fixed this will be changed to something like...
+                    //brand = (currentCell==null) ? new brandScrape(this.upc).runAndReturn() : currentCell;
                 case "ITEM NAME":
-                    item = currentCell;    
+                    item = currentCell.toUpperCase().replace("[^0-9a-zA-Z]","");
+                    if (!columnNames.contains("RECEIPT ALIAS")) {
+                        alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]",""));
+                        isOrganic = currentCell.contains(" ORG");
+                    }
                     break;
                 case "RECEIPT ALIAS":
                     //this will be changed separately
-                    alias = currentCell;                    
+                    isOrganic = currentCell.contains(" ORG");
+                    alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]",""));
                     break;
                 case "UPC":
                     upc = getUPC(currentCell);
@@ -81,11 +88,14 @@ public class row {
                     break;
                 case "ITEM NAME":
                     line += item+"\t";
+                    if (!order.contains("RECEIPT ALIAS")) {
+                        line += alias+"\t";
+                    }
                     break;
                 default:
-                    //System.out.print(default_index+" ");
-                    if (default_index<len)
-                        line += unchanged[default_index]+"\t";
+                    if (default_index<len) {
+                        line += unchanged[default_index] + "\t";
+                    }
                     default_index++;
                     break;
             }
@@ -101,19 +111,19 @@ public class row {
         myMap.put("AS ", "");myMap.put("SOME ", "");myMap.put("ZERO ", "0 ");myMap.put("ONE ", "1 ");
         myMap.put("TWO ", "2 ");myMap.put("THREE ", "3 ");myMap.put("FOUR ", "4 ");myMap.put("FIVE ", "5 ");
         myMap.put("SIX ", "6 ");myMap.put("SEVEN ", "7 ");myMap.put("EIGHT ", "8 ");myMap.put("NINE ", "9 ");
-        myMap.put("ULTRA ", "ULT ");myMap.put("ANTI-OXIDANT ", "ANTI-OXI ");//myMap.put("UNSWEETENED ", "UNSWTND ");
+        myMap.put("ULTRA ", "ULT ");myMap.put("ANTI-OXIDANT ", "ANTI-OXI ");myMap.put("UNSWEETENED ", "UNSWTND ");
         myMap.put("UNSWTND ", "UNSWT ");myMap.put("GRAPEFRUIT ", "GRPFRUT");myMap.put("GRPFRUT ", "GRPFRT");
         myMap.put("CALCIUM ", "CLCM ");myMap.put("POTASSIUM ", "POTASSM ");myMap.put("POTASSM ", "POTASM ");
         myMap.put("MAGNESIUM ", "MAGN ");myMap.put("MAGN ", "MGN ");myMap.put("REDUCED ", "REDUX ");
         myMap.put("SODIUM ", "SODM ");myMap.put("SODM ", "SOD ");myMap.put("COMPLEX ", "CMPLX ");
         myMap.put("CMPLX ", "COMP ");myMap.put("LOZENGE ", "LZNG ");myMap.put("VITAMIN ", "VIT ");myMap.put("PURPOSE ", "PURP ");
-        myMap.put("MIXED ", "MIX ");myMap.put("ACTIVATED ", "ACTVTED ");/*NOT SURE IF THIS ONE WORKS???*/
-        myMap.put("ALCOHOL ", "ALC ");myMap.put("FREE ", "FR ");myMap.put("VEGETARIAN ", "VEG ");myMap.put("CONCENTRATE ", "CONC ");
-        myMap.put("VEGGIE ", "VEG ");myMap.put("CONCENTRATE ", "CONC ");myMap.put("DAILY ", "DLY ");myMap.put("ONCE ", "1");
-        myMap.put("TWICE ", "2");myMap.put("DOUBLE ", "DBL ");myMap.put("METABOLISM ", "METABLSM ");myMap.put("METABLSM ", "MTBLSM");
-        myMap.put("ARGAN ", "ARGN ");myMap.put("ARGN ", "ARG ");myMap.put("FACIAL ", "FACL ");myMap.put("FACL ", "FAC ");
+        myMap.put("MIXED ", "MIX ");myMap.put("ALCOHOL ", "ALC ");myMap.put("FREE ", "FR ");myMap.put("VEGETARIAN ", "VEG ");
+        myMap.put("CONCENTRATE ", "CONC ");myMap.put("VEGGIE ", "VEG ");myMap.put("CONCENTRATE ", "CONC ");
+        myMap.put("DAILY ", "DLY ");myMap.put("ONCE ", "1");myMap.put("TWICE ", "2");myMap.put("DOUBLE ", "DBL ");
+        myMap.put("METABOLISM ", "METABLSM ");myMap.put("METABLSM ", "MTBLSM");myMap.put("ARGAN ", "ARGN ");
+        myMap.put("ARGN ", "ARG ");myMap.put("FACIAL ", "FACL ");myMap.put("FACL ", "FAC ");
         myMap.put("TREATMENT ", "TRTMNT ");myMap.put("CHAMOMILE ", "CHAM ");myMap.put("SUSTAINED ", "SUST ");
-        myMap.put("RELEASE ", "REL ");
+        myMap.put("RELEASE ", "REL ");myMap.put("MOZZARELLA ", "MOZZ ");myMap.put("VANILLA ", "VAN ");
         return myMap;
     }
 
@@ -203,8 +213,8 @@ public class row {
                 newStr += j != sentence.length-1 ? sentence[j]+" " : sentence[j];
             }
         }
-        if (newStr.length() > 32 && numRemoved <= 4) {
-            newStr = receiptBrute(newStr, numRemoved+1);
+        if (newStr.length() > 32 && numRemoved < 3) {
+            return receiptBrute(newStr, numRemoved+1);
             //should ass more criteria, so the length of string and number of characters to remove is
             //taken into account
         }
@@ -218,10 +228,8 @@ public class row {
      * @param cellValue
      */
     private String getReceiptAlias(String cellValue) {
-        isOrganic = cellValue.contains(" ORG");
         String newString = "";
         if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z\\. ]",""); }
-        System.out.println(isOrganic?"ORGANIC":"NOT ORGANIC");
 
         cellValue = cellValue.contains(brand) ? cellValue.replace(brand+" ", "") : cellValue;
         String[] parsed = cellValue.toUpperCase().replaceAll("[^0-9A-Za-z\\. ]","").split(" ");
@@ -238,6 +246,7 @@ public class row {
             String sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
             //if substring is the brand, skip concatenating it
             //regex to fix year
+            System.out.println(parsed.length + " test");
             if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
             //if substring already has an alias, concatenate that and continue
             if (aliases.get(sub+" ") != null) {
@@ -305,9 +314,9 @@ public class row {
        /* System.out.println(wb.getMSRP("11.43"));
         System.out.println(wb.getMSRP("11.65"));
 */
-        wb.setBrand("BROUWERIJ VERHAEGHE");
+        wb.setBrand("");
         String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-        String ret = wb.getReceiptAlias(test);
+        String ret = wb.receiptBrute(test, 0);
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
         System.out.println("End Phrase: " + ret.length() + "\n" + ret);
 
