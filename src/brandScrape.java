@@ -1,6 +1,7 @@
 package src;
 
 import com.jaunt.*;
+import com.jaunt.UserAgent;
 import java.util.ArrayList;
 //import com.gargoylesoftware.htmlunit.*;
 

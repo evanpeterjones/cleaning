@@ -38,6 +38,7 @@ public class catalog
     private List<String> cv;
     private String line;
     private boolean isTSV;
+    private boolean needsAlias=false;
     
     public String getFilePath() 
     {      
@@ -50,29 +51,30 @@ public class catalog
         {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");  
             LocalDateTime now = LocalDateTime.now();
+
             if (fileName.contains("xlsx"))
             {
                 //readXLSX( new XSSFWorkbook( new File(fileName)));
             } 
             else if (fileName.contains("tsv")) 
             {
+                
+                tsv = new File(fileName.replace(".tsv","_"+dtf.format(now)+".tsv"));
+                toTSV = new BufferedWriter(new FileWriter(tsv));                
                 read = new BufferedReader( new FileReader( new File(fileName)));       
-                //readTSV();
-            } 
-            else 
+                line = read.readLine().toUpperCase().replace("LENGTH\t", "")+"\r\n";                
+                needsAlias = !line.contains("RECEIPT ALIAS");
+                cv = Arrays.asList(line.split("\t"));
+                line = (!needsAlias) ? line : line.split("ITEM NAME")[0]+"ITEM NAME\tRECEIPT ALIAS"+line.split("ITEM NAME")[1];
+                toTSV.append(line);
+                System.out.println(line);
+                readTSV();
+            }
+            else
             {
                 System.out.println("Error, file-type must be 'xslx' or 'tsv'");
                 System.exit(1);
-            }
-            
-            // new TSV output file
-            tsv = new File(fileName.replace(".tsv","_"+dtf.format(now)+".tsv"));
-            toTSV = new BufferedWriter(new FileWriter(tsv));
-            //create first line of new file and array of column names which is used by either method of file reading
-            line = read.readLine();
-            cv = Arrays.asList(line.split("\t"));
-            toTSV.append(line.toUpperCase().replace("LENGTH\t","")+"\r\n");
-            readTSV();
+            }            
         } 
         catch (Exception e)
         {
@@ -91,12 +93,13 @@ public class catalog
         line = read.readLine();
         while (line != null) 
         {
-            row currentRow = new row(line.split("\t"), cv);
+            row currentRow = new row(line.toUpperCase().split("\t"), cv, needsAlias);
             output(currentRow.getLine());
             line = read.readLine();
         }
         toTSV.close();
         read.close();
+        System.out.println("TSV Read and Created");
         filePath = getFilePath();
     }
     /** readXLSX

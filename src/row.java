@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 
 public class row {
-    //
     private String item = "";
     private String upc = "";
     private String alias = "";
@@ -20,7 +19,9 @@ public class row {
     private String def = "";
     private boolean isOrganic = false;
     private static final Map<String, String> aliases = createMap();
+    private static String[] chars = {"I","A","O","U","E"};
     private String line = ""; //to be returned
+    private boolean createAlias=false;
 
     public row() {
         //just to test
@@ -31,27 +32,32 @@ public class row {
      * @param ORIGINAL String[] column values parsed by '\t'
      * @param columnNames String[] column name order
      */
-    public row(String[] ORIGINAL, List<String> columnNames) {                
+    public row(String[] ORIGINAL, List<String> columnNames, boolean ca) {                
+        createAlias=ca;
         String currentCell = "";
         for (String cell : columnNames) {
-            currentCell = ORIGINAL[columnNames.indexOf(cell)];                
+            currentCell = ORIGINAL[columnNames.indexOf(cell)];       
+            //System.out.println("Array Index: "+columnNames.indexOf(cell)+" cell:"+cell+ " "+currentCell);
             switch (cell) {
                 case "LENGTH": break;
                 case "BRAND":
                     brand = currentCell;
                     //once fixed this will be changed to something like...
                     //brand = (currentCell==null) ? new brandScrape(this.upc).runAndReturn() : currentCell;
+                    break;
                 case "ITEM NAME":
-                    item = currentCell.toUpperCase().replace("[^0-9a-zA-Z]","");
-                    if (!columnNames.contains("RECEIPT ALIAS")) {
-                        alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]",""));
-                        isOrganic = currentCell.contains(" ORG");
+                    System.out.println("Current Item: "+currentCell);    
+                    item = currentCell.replace("^[0-9a-zA-Z]","");
+                    if (createAlias) {
+                        isOrganic = currentCell.contains("[ ORG.]");
+                        alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]","").replace("[ ORG.]", ""));
+                        System.out.println("Manipulated: "+alias);
                     }
                     break;
                 case "RECEIPT ALIAS":
-                    //this will be changed separately
-                    isOrganic = currentCell.contains(" ORG");
-                    alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]",""));
+                    //this will be changed separately                                        
+                    isOrganic = currentCell.contains(" ORG.*");
+                    alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]","").replace(" ORG.*", ""));
                     break;
                 case "UPC":
                     upc = getUPC(currentCell);
@@ -88,7 +94,7 @@ public class row {
                     break;
                 case "ITEM NAME":
                     line += item+"\t";
-                    if (!order.contains("RECEIPT ALIAS")) {
+                    if (createAlias) {
                         line += alias+"\t";
                     }
                     break;
@@ -203,19 +209,17 @@ public class row {
         int shortest = 0;
         String word = "";
         //for (String word : sentence) {
-        for (int i = sentence.length-1; i >= 0; i--) {
-            if (sentence[i].length() < sentence[shortest].length()) {
-                shortest = i;
-            }
+        for (int i = sentence.length-1; i > 0; i--) {
+            shortest = (sentence[i].length() < sentence[shortest].length()) ? i : shortest;
         }
         for (int j = 0; j < sentence.length; j++) {
             if (j != shortest) {
-                newStr += j != sentence.length-1 ? sentence[j]+" " : sentence[j];
+                newStr += j < sentence.length ? sentence[j]+" " : sentence[j];
             }
         }
-        if (newStr.length() > 32 && numRemoved < 3) {
-            return receiptBrute(newStr, numRemoved+1);
-            //should ass more criteria, so the length of string and number of characters to remove is
+        if (newStr.length() > 32) {
+            return newStr; //receiptBrute(newStr, numRemoved+1);
+            //should assume more criteria, so the length of string and number of characters to remove is
             //taken into account
         }
         return newStr;
@@ -229,31 +233,25 @@ public class row {
      */
     private String getReceiptAlias(String cellValue) {
         String newString = "";
-        if ( cellValue.length() <= 32 ){ return cellValue.toUpperCase().replaceAll("[^0-9A-Za-z\\. ]",""); }
-
+        if (cellValue.length() <= 32 ){ return cellValue.replaceAll("[^0-9A-Za-z\\. ]",""); }
+        if (cellValue.contains(" ORGANIC")) {
+            cellValue = cellValue.replace(" ORGANIC", "");
+            this.isOrganic = true;
+        }
         cellValue = cellValue.contains(brand) ? cellValue.replace(brand+" ", "") : cellValue;
-        String[] parsed = cellValue.toUpperCase().replaceAll("[^0-9A-Za-z\\. ]","").split(" ");
-        //number of characters to remove
+        String[] parsed = cellValue.replaceAll("[^0-9A-Za-z\\. ]","").split(" " );
+
         int NUM_REMOVE = cellValue.length() - 32;
-        //running count of how many we HAVE removed
         int numActRemoved = 0;
-        String[] chars = {"I","A","O","U","E"};
-        /*
-        oh god, this is a mess, please simplify this so it's legible
-        */
-        // TODO: add a check for years, so "2018" become "18"
         for (int i = 0; i < parsed.length; i++) {
             String sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
-            //if substring is the brand, skip concatenating it
-            //regex to fix year
-            System.out.println(parsed.length + " test");
+            //Regex to fix year
             if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
             //if substring already has an alias, concatenate that and continue
             if (aliases.get(sub+" ") != null) {
                 String fromAlias = aliases.get(sub + " ");
                 newString += fromAlias;
                 NUM_REMOVE -= sub.length() - fromAlias.length();
-               // System.out.println("Hashmap is working! Saved " + fromAlias.length() + " many characters!!");
                 continue;
             }
             //otherwise this mess... remove vowels ?
@@ -314,15 +312,20 @@ public class row {
        /* System.out.println(wb.getMSRP("11.43"));
         System.out.println(wb.getMSRP("11.65"));
 */
-        wb.setBrand("");
+        wb.setBrand("BROUWERIJ VERHAEGHE");
         String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-        String ret = wb.receiptBrute(test, 0);
+        String tst = "TORTILLA WHITE FLOUR 12 12 CT FOOD SERVICE STACEYS ORGANIC TORTILLAS\n";
+        String ret = wb.getReceiptAlias(test);
+        String rt = wb.getReceiptAlias(tst);
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
         System.out.println("End Phrase: " + ret.length() + "\n" + ret);
 
+        System.out.println("Start Phrase: " + tst.length() + "\n" + tst);
+        System.out.println("End Phrase: " + rt.length() + "\n" + rt);
+
         String the = "071537075403	POLAR	4.12	1007540	POLAR	EA	1	CARBO	3GJ	WATER	CARB	POL PURIFIED 3GAL CARBOY	POL PURIFIED 3GAL CARBOY	071537075403	071537075403	4.12";
-        String tst = "UPC	BRAND	COST EACH	SUID	VENDOR	UOM	CASE PK	SIZE	PACK SIZE	Category	FLAVOR	ITEM NAME	RECEIPT ALIAS	UNITUPC	CASEUPC	CASE PRICE";
-        row t = new row(the.split("\t"), Arrays.asList(tst.split("\t")));
+        String ts = "UPC	BRAND	COST EACH	SUID	VENDOR	UOM	CASE PK	SIZE	PACK SIZE	Category	FLAVOR	ITEM NAME	RECEIPT ALIAS	UNITUPC	CASEUPC	CASE PRICE";
+        row t = new row(the.split("\t"), Arrays.asList(ts.split("\t")), false);
         System.out.println("\n"+t.def);
         System.out.println(t.getLine());
         //catalog test = new catalog();
