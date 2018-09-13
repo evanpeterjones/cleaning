@@ -1,51 +1,76 @@
 package src;
 
-import com.jaunt.*;
-import com.jaunt.UserAgent;
+import org.jsoup.*;
 import java.util.ArrayList;
-//import com.gargoylesoftware.htmlunit.*;
+import java.io.*;
+import java.util.Scanner;
+import java.util.HashMap;
+import java.net.SocketTimeoutException;
 
 public class brandScrape
 {
-    private String du = "https://duckduckgo.com/?q=";
-    private String ck = "&t=hi&ia=web";//&atb=v127-6ba&ia=answer
+    private String url= "https://www.nelsonwholesale.com/items/";
     private String userAgent = "";
-    private String upc = "";
+    private String suid = "";
+    private String pageHTML = "";
     private String brand = "";
+    private String brandLoc = "itemprop=\"name\">";
+    //private String imagepath = System.getProperty("user.dir")+"/images"; <-not sure if this works
     private ArrayList<ArrayList<String>> possibleBrands = new ArrayList<ArrayList<String>>();
     private ArrayList<String> links = new ArrayList<String>();
 
-    public brandScrape(String upc)
+    public brandScrape(String upc) throws Exception
     {
-        this.upc=upc;    
+        this.suid=upc;  
+        fetch();  
     }
 
-    public String runAndReturn() throws Exception
-    {
-        return "";
-        //return s.doc.innerHTML();
-        /*
-        UserAgent userAgent = new UserAgent();      //create new userAgent (headless browser)
-        userAgent.visit("http://google.com");       //visit google
-        userAgent.doc.apply("butterflies");         //apply form input (starting at first editable field)
-        userAgent.doc.submit("Google Search");      //click submit button labelled "Google Search"
-        
-        Elements links = userAgent.doc.findEvery("<h3 class=r>").findEvery("<a>");   //find search result links 
-        for(Element link : links) System.out.println(link.getAt("href"));
-        // complete a duck_duck_go search and create array of url links ?/maybe store each description to compare?
-        // loop through array*/
-     
+    public void fetch() throws Exception
+    {        
+        try{                 
+            brand = findBrand(Jsoup.connect(url+suid)
+                .userAgent(new RandomUserAgent()
+                .getRandomUserAgent())
+                .timeout(30*1000)
+                .followRedirects(false)
+                .ignoreHttpErrors(true)
+                .get().toString()
+            );            
+        } catch (SocketTimeoutException e) {
+            System.err.println("Socket timed out, trying again...");
+            Thread.sleep(2000);
+            fetch();
+        }
     }
+
+    public String findBrand(String html) {
+        if (html.contains(brandLoc)) {
+            String br = html.split(brandLoc)[1].split("</span>")[0];            
+            if (br.contains(":")) {
+                String parse = br.split(":")[0];
+                System.out.println("Got: "+parse);
+                return parse;
+            } else {
+                return " ";
+            }
+        }
+        return " ";
+    }
+
+    public String getBrand() { return this.brand; }
 
     public static void main(String[] args) throws Exception
-    {
-        //brandScrape foo = new brandScrape(args[0]);
-        UserAgent s = new UserAgent();
-        s.settings.autoSaveAsHTML = true;
-        //s.visit(du + upc + ck);
-        s.visit("https://duckduckgo.com");
-        //s.doc.apply( args[0] );
-        //s.doc.submit("search__button");
-        System.out.println(s.doc.innerHTML());
+    {        
+        File f = new File(args[0]);
+        Scanner file = new Scanner(f);        
+        PrintWriter o = new PrintWriter("out.txt");
+        String current;
+        while ((current = file.next()) != null) {            
+            o.println(new brandScrape(current).getBrand().toUpperCase());
+            Thread.sleep((long) (Math.random() * 4000));
+            o.flush();
+        }
+        file.close();
+        System.out.println("DONE");
     }
 }

@@ -46,7 +46,6 @@ public class row {
                     //brand = (currentCell==null) ? new brandScrape(this.upc).runAndReturn() : currentCell;
                     break;
                 case "ITEM NAME":
-                    System.out.println("Current Item: "+currentCell);    
                     item = currentCell.replace("^[0-9a-zA-Z]","");
                     if (createAlias) {
                         isOrganic = currentCell.contains("[ ORG.]");
@@ -55,7 +54,6 @@ public class row {
                     }
                     break;
                 case "RECEIPT ALIAS":
-                    //this will be changed separately                                        
                     isOrganic = currentCell.contains(" ORG.*");
                     alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]","").replace(" ORG.*", ""));
                     break;
@@ -274,7 +272,7 @@ public class row {
         if (NUM_REMOVE > 0) {
             return receiptBrute(newString, 0);
         }
-        return newString.replaceAll("[^a-zA-Z0-9 ]", "").replaceAll("  "," ");
+        return newString.replaceAll("  "," ");
     }
     private void setBrand(String a) { this.brand = a; }
 
@@ -304,6 +302,7 @@ public class row {
     }
 
     public String getLine() {
+        if (this.UPC == null || this.brand == null || this.alias == null) { return null; }
         return line;
     }
 

@@ -93,8 +93,10 @@ public class catalog
         line = read.readLine();
         while (line != null) 
         {
-            row currentRow = new row(line.toUpperCase().split("\t"), cv, needsAlias);
-            output(currentRow.getLine());
+            String current = new row(line.toUpperCase().split("\t"), cv, needsAlias).getLine();
+            if (current != null) {
+                output(current);
+            }
             line = read.readLine();
         }
         toTSV.close();
