@@ -111,23 +111,24 @@ public class row {
      */
     private static Map<String, String> createMap() {
         Map<String, String> myMap = new HashMap<String, String>();
-        myMap.put("WITH ", "W/");myMap.put("AND ", "& ");myMap.put("HIGH ", "HI ");myMap.put("LOW ", "LO ");
-        myMap.put("AS ", "");myMap.put("SOME ", "");myMap.put("ZERO ", "0 ");myMap.put("ONE ", "1 ");
-        myMap.put("TWO ", "2 ");myMap.put("THREE ", "3 ");myMap.put("FOUR ", "4 ");myMap.put("FIVE ", "5 ");
-        myMap.put("SIX ", "6 ");myMap.put("SEVEN ", "7 ");myMap.put("EIGHT ", "8 ");myMap.put("NINE ", "9 ");
-        myMap.put("ULTRA ", "ULT ");myMap.put("ANTI-OXIDANT ", "ANTI-OXI ");myMap.put("UNSWEETENED ", "UNSWTND ");
-        myMap.put("UNSWTND ", "UNSWT ");myMap.put("GRAPEFRUIT ", "GRPFRUT");myMap.put("GRPFRUT ", "GRPFRT");
-        myMap.put("CALCIUM ", "CLCM ");myMap.put("POTASSIUM ", "POTASSM ");myMap.put("POTASSM ", "POTASM ");
-        myMap.put("MAGNESIUM ", "MAGN ");myMap.put("MAGN ", "MGN ");myMap.put("REDUCED ", "REDUX ");
-        myMap.put("SODIUM ", "SODM ");myMap.put("SODM ", "SOD ");myMap.put("COMPLEX ", "CMPLX ");
-        myMap.put("CMPLX ", "COMP ");myMap.put("LOZENGE ", "LZNG ");myMap.put("VITAMIN ", "VIT ");myMap.put("PURPOSE ", "PURP ");
-        myMap.put("MIXED ", "MIX ");myMap.put("ALCOHOL ", "ALC ");myMap.put("FREE ", "FR ");myMap.put("VEGETARIAN ", "VEG ");
-        myMap.put("CONCENTRATE ", "CONC ");myMap.put("VEGGIE ", "VEG ");myMap.put("CONCENTRATE ", "CONC ");
-        myMap.put("DAILY ", "DLY ");myMap.put("ONCE ", "1");myMap.put("TWICE ", "2");myMap.put("DOUBLE ", "DBL ");
-        myMap.put("METABOLISM ", "METABLSM ");myMap.put("METABLSM ", "MTBLSM");myMap.put("ARGAN ", "ARGN ");
-        myMap.put("ARGN ", "ARG ");myMap.put("FACIAL ", "FACL ");myMap.put("FACL ", "FAC ");
-        myMap.put("TREATMENT ", "TRTMNT ");myMap.put("CHAMOMILE ", "CHAM ");myMap.put("SUSTAINED ", "SUST ");
-        myMap.put("RELEASE ", "REL ");myMap.put("MOZZARELLA ", "MOZZ ");myMap.put("VANILLA ", "VAN ");
+	myMap.put("WITH","W/");myMap.put("AND","&");myMap.put("HIGH","HI");myMap.put("LOW","LO");
+	myMap.put("AS","");myMap.put("SOME","");myMap.put("ZERO","0");myMap.put("ONE","1");
+	myMap.put("TWO","2");myMap.put("THREE","3");myMap.put("FOUR","4");myMap.put("FIVE","5");
+	myMap.put("SIX","6");myMap.put("SEVEN","7");myMap.put("EIGHT","8");myMap.put("NINE","9");
+	myMap.put("ULTRA","ULT");myMap.put("ANTI-OXIDANT","ANTI-OXI");myMap.put("UNSWEETENED","UNSWTND");
+	myMap.put("UNSWTND","UNSWT");myMap.put("GRAPEFRUIT","GRPFRUT");myMap.put("GRPFRUT","GRPFRT");
+	myMap.put("CALCIUM","CLCM");myMap.put("POTASSIUM","POTASSM");myMap.put("POTASSM","POTASM");
+	myMap.put("MAGNESIUM","MAGN");myMap.put("MAGN","MGN");myMap.put("REDUCED","REDUX");
+	myMap.put("SODIUM","SODM");myMap.put("SODM","SOD");myMap.put("COMPLEX","CMPLX");
+	myMap.put("CMPLX","COMP");myMap.put("LOZENGE","LZNG");myMap.put("VITAMIN","VIT");myMap.put("PURPOSE","PURP");
+	myMap.put("MIXED","MIX");myMap.put("ALCOHOL","ALC");myMap.put("FREE","FR");myMap.put("VEGETARIAN","VEG");
+	myMap.put("CONCENTRATE","CONC");myMap.put("VEGGIE","VEG");myMap.put("CONCENTRATE","CONC");
+	myMap.put("DAILY","DLY");myMap.put("ONCE","1");myMap.put("TWICE","2");myMap.put("DOUBLE","DBL");
+	myMap.put("METABOLISM","METABLSM");myMap.put("METABLSM","MTBLSM");myMap.put("ARGAN","ARGN");
+	myMap.put("ARGN","ARG");myMap.put("FACIAL","FACL");myMap.put("FACL","FAC");
+	myMap.put("TREATMENT","TRTMNT");myMap.put("CHAMOMILE","CHAM");myMap.put("SUSTAINED","SUST");
+	myMap.put("RELEASE","REL");myMap.put("MOZZARELLA","MOZZ");myMap.put("VANILLA","VAN");
+	myMap.put("NATURAL","NAT");
         return myMap;
     }
 
@@ -202,23 +203,22 @@ public class row {
      * @return
      */
     private String receiptBrute(String full, int numRemoved) {
-        String[] sentence = full.split(" ");
+	String f[] = full.split(" ");
+	if (full.length()-f.length <= 32) { return full; }
+	System.out.println(full.length() + " "+full);
+	System.out.println(full.length()-f.length + " difference");	
         String newStr = "";
-        int shortest = 0;
-        String word = "";
+        String shortestword = full;
         //for (String word : sentence) {
-        for (int i = sentence.length-1; i > 0; i--) {
-            shortest = (sentence[i].length() < sentence[shortest].length()) ? i : shortest;
-        }
-        for (int j = 0; j < sentence.length; j++) {
-            if (j != shortest) {
-                newStr += j < sentence.length ? sentence[j]+" " : sentence[j];
-            }
-        }
-        if (newStr.length() > 32) {
-            return newStr; //receiptBrute(newStr, numRemoved+1);
-            //should assume more criteria, so the length of string and number of characters to remove is
-            //taken into account
+	for (String word : f) {
+	    shortestword = (word.length() < shortestword.length()) ? word : shortestword;
+	}
+	for (String word : f) {
+	    newStr += (word.equals(shortestword)) ? "" : word+" "; 
+	}
+	System.out.println(newStr);
+        if (newStr.length()-(f.length-1) > 32) {
+	    return receiptBrute(newStr, numRemoved+1);
         }
         return newStr;
     }
@@ -231,30 +231,31 @@ public class row {
      */
     private String getReceiptAlias(String cellValue) {
         String newString = "";
+	String sub = "";
+	String fromalias = null;
+	String temp = "";
         cellValue = cellValue.contains(brand) ? cellValue.replace(brand, "") : cellValue;
         if (cellValue.length() <= 32 ){ return cellValue.replaceAll("[^0-9A-Za-z\\. ]",""); }
-        if (cellValue.contains(" ORGANIC")) {
-            cellValue = cellValue.replace(" ORGANIC", "");
-            this.isOrganic = true;
-        }
-        String[] parsed = cellValue.replaceAll("[^0-9A-Za-z\\. ]","").split(" " );
-
+        if (cellValue.contains(" ORGANIC")) { cellValue = cellValue.replace(" ORGANIC", ""); this.isOrganic = true; }
+	cellValue = receiptBrute(cellValue, 0);
+        String[] parsed = cellValue.replaceAll("[^0-9A-Za-z\\. ]","").split(" ");
         int NUM_REMOVE = cellValue.length() - 32;
-        int numActRemoved = 0;
+
+	//loops through substrings
         for (int i = 0; i < parsed.length; i++) {
-            String sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
-            //Regex to fix year
-            if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
+            sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
             //if substring already has an alias, concatenate that and continue
-            if (aliases.get(sub+" ") != null) {
-                String fromAlias = aliases.get(sub + " ");
-                newString += fromAlias;
-                NUM_REMOVE -= sub.length() - fromAlias.length();
+	    fromalias = aliases.get(sub);
+            if (fromalias != null) {                
+                newString += (i==0) ? fromalias : " "+fromalias;
+                NUM_REMOVE -= sub.length() - fromalias.length();
                 continue;
             }
+            //Regex to fix year
+            if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
             //otherwise this mess... remove vowels ?
             else {
-                String temp = sub;
+                temp = sub;
                 int numRemoved = 0;
                 for (String ch : chars) {
                     int v = temp.lastIndexOf(ch);
@@ -265,14 +266,13 @@ public class row {
                         NUM_REMOVE--;
                     }
                 }
-                newString+= i==0 ? temp : " "+temp;
-                numActRemoved += numRemoved;
+                newString += i==0 ? temp : " "+temp;
             }
-        }
+        }/*
 	if (NUM_REMOVE > 0) {
             return receiptBrute(newString, 0);
-	}
-        return newString.replaceAll("  "," ");
+	    }*/
+        return newString;
     }
     private void setBrand(String a) { this.brand = a; }
 
