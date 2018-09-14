@@ -231,12 +231,12 @@ public class row {
      */
     private String getReceiptAlias(String cellValue) {
         String newString = "";
+        cellValue = cellValue.contains(brand) ? cellValue.replace(brand, "") : cellValue;
         if (cellValue.length() <= 32 ){ return cellValue.replaceAll("[^0-9A-Za-z\\. ]",""); }
         if (cellValue.contains(" ORGANIC")) {
             cellValue = cellValue.replace(" ORGANIC", "");
             this.isOrganic = true;
         }
-        cellValue = cellValue.contains(brand) ? cellValue.replace(brand+" ", "") : cellValue;
         String[] parsed = cellValue.replaceAll("[^0-9A-Za-z\\. ]","").split(" " );
 
         int NUM_REMOVE = cellValue.length() - 32;
@@ -269,9 +269,9 @@ public class row {
                 numActRemoved += numRemoved;
             }
         }
-        if (NUM_REMOVE > 0) {
+	if (NUM_REMOVE > 0) {
             return receiptBrute(newString, 0);
-        }
+	}
         return newString.replaceAll("  "," ");
     }
     private void setBrand(String a) { this.brand = a; }
@@ -302,18 +302,17 @@ public class row {
     }
 
     public String getLine() {
-        if (this.UPC == null || this.brand == null || this.alias == null) { return null; }
+        if (this.upc == null || this.brand == null || this.alias == null) { return null; }
         return line;
     }
 
     public static void main(String[] args) throws IOException {
         row wb = new row();
-       /* System.out.println(wb.getMSRP("11.43"));
-        System.out.println(wb.getMSRP("11.65"));
-*/
-        wb.setBrand("BROUWERIJ VERHAEGHE");
+        wb.setBrand("KETTLE CUISINE");
         String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-        String tst = "TORTILLA WHITE FLOUR 12 12 CT FOOD SERVICE STACEYS ORGANIC TORTILLAS\n";
+        test = "SOUP HUNGARIAN MUSHROOM NATURAL KETTLE CUISINE\t";
+	test = "JUICE DAILY GREENS KOSHER BOLTHOUSE FARMS";
+        String tst = "SOUP FRENCH ONION NATURAL KETTLE CUISINE\t";
         String ret = wb.getReceiptAlias(test);
         String rt = wb.getReceiptAlias(tst);
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
