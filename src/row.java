@@ -1,6 +1,7 @@
 package src;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.io.*;
 import java.util.ArrayList;
@@ -17,14 +18,25 @@ public class row {
     private String msrp = "";
     private String brand = "";
     private String def = "";
-    private boolean isOrganic = false;
+    //these bools still have no implementation
+    private boolean isOrganic        = false;
+    private boolean isGlutenFree     = false;
+    private boolean isCageFree       = false;
+    private boolean isVegan          = false;
+    private boolean isVegetarian     = false;
+    private boolean isLowSodium      = false;
+    private boolean isAntibioticFree = false;
+    private boolean isKosher         = false;
+    private boolean isNonGMO         = false;
+    private boolean isRaw            = false;
+    //
     private static final Map<String, String> aliases = createMap();
     private static String[] chars = {"I","A","O","U","E"};
     private String line = ""; //to be returned
     private boolean createAlias=false;
 
-    public row() {
-        //just to test
+    public row(){
+        //testing: remove later
     }
     /** row
      * Constructor 
@@ -37,25 +49,23 @@ public class row {
         String currentCell = "";
         for (String cell : columnNames) {
             currentCell = ORIGINAL[columnNames.indexOf(cell)];       
-            //System.out.println("Array Index: "+columnNames.indexOf(cell)+" cell:"+cell+ " "+currentCell);
             switch (cell) {
                 case "LENGTH": break;
                 case "BRAND":
-                    brand = currentCell;
+                    brand = (!(Pattern.compile("[A-Z0-9]").matcher(currentCell).find())) ? null : currentCell;
                     //once fixed this will be changed to something like...
                     //brand = (currentCell==null) ? new brandScrape(this.upc).runAndReturn() : currentCell;
                     break;
                 case "ITEM NAME":
-                    item = currentCell.replace("^[0-9a-zA-Z]","");
+                    item = currentCell.replace("^[0-9a-zA-Z\\. ]","");
                     if (createAlias) {
-                        isOrganic = currentCell.contains("[ ORG.]");
-                        alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]","").replace("[ ORG.]", ""));
-                        System.out.println("Manipulated: "+alias);
+                        isOrganic = currentCell.contains(" ORG");
+                        alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z\\. ]",""));
                     }
                     break;
                 case "RECEIPT ALIAS":
-                    isOrganic = currentCell.contains(" ORG.*");
-                    alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z]","").replace(" ORG.*", ""));
+                    isOrganic = currentCell.contains(" ORG");
+                    alias = getReceiptAlias(currentCell.replace("^[0-9a-zA-Z\\. ]",""));
                     break;
                 case "UPC":
                     upc = getUPC(currentCell);
@@ -72,6 +82,10 @@ public class row {
     }
 
     public void createLine(List<String> order) {
+        if (upc == "" || alias =="") {
+            line = null;
+            return;
+        }
         String[] unchanged = def.split("\t");  
         int len = unchanged.length;
         int default_index = 0;
@@ -128,7 +142,7 @@ public class row {
 	myMap.put("ARGN","ARG");myMap.put("FACIAL","FACL");myMap.put("FACL","FAC");
 	myMap.put("TREATMENT","TRTMNT");myMap.put("CHAMOMILE","CHAM");myMap.put("SUSTAINED","SUST");
 	myMap.put("RELEASE","REL");myMap.put("MOZZARELLA","MOZZ");myMap.put("VANILLA","VAN");
-	myMap.put("NATURAL","NAT");
+	myMap.put("NATURAL","NAT");myMap.put("INCH", "IN");
         return myMap;
     }
 
@@ -150,21 +164,21 @@ public class row {
 
     private String getUPC(String theUPC) {
         String UPC = (theUPC.charAt(0) == '0' && theUPC.length() == 12) ? removeLead(theUPC) : theUPC;
-        String newUPC = "";
+        String newUPC = "";                
+        if (UPC.contains(".")) {System.out.println("error: "+UPC);}
         switch (UPC.length()) {
             case 11:
                 newUPC = UPC + checkDigit(UPC);
                 break;
             default:
-                if (UPC.length() < 11) {
-                    //only UPCs of length 11 have shown to not include the check digit
+                if (UPC.length() < 11 && UPC.length() != 6) {
                     for (int i = 0; i < (11 - UPC.length()); i++) { newUPC += "0"; }
-                    newUPC += UPC;
-                    newUPC += checkDigit(newUPC);
+                    newUPC += UPC + checkDigit(newUPC+UPC);
                 } else {
                     newUPC = UPC;
                 }
         }
+        if (newUPC.length() > 12) { System.out.println(theUPC +"\t"+UPC);}
         return newUPC;
     }
 
@@ -176,7 +190,7 @@ public class row {
      * @return checkDigChar
      */
     private char checkDigit(String UPC) {
-        if (UPC.length() != 11) { System.out.println("ERROR, UPC LENGTH"); System.exit(1); }
+        if (UPC.length() != 11) { System.out.println("ERROR, UPC LENGTH: "+UPC.length()+"\n"+UPC); System.exit(1); }
         char checkDigChar;
         int odd = 0;
         int even = 0;
@@ -202,23 +216,17 @@ public class row {
      * @param numRemoved
      * @return
      */
-    private String receiptBrute(String full, int numRemoved) {
-	String f[] = full.split(" ");
-	if (full.length()-f.length <= 32) { return full; }
-	System.out.println(full.length() + " "+full);
-	System.out.println(full.length()-f.length + " difference");	
+    private String receiptBrute(String full, int numRemoved) {        
+        String f[] = full.split(" ");
+
         String newStr = "";
         String shortestword = full;
-        //for (String word : sentence) {
-	for (String word : f) {
-	    shortestword = (word.length() < shortestword.length()) ? word : shortestword;
-	}
-	for (String word : f) {
-	    newStr += (word.equals(shortestword)) ? "" : word+" "; 
-	}
-	System.out.println(newStr);
-        if (newStr.length()-(f.length-1) > 32) {
-	    return receiptBrute(newStr, numRemoved+1);
+        for (String word : f) {
+            shortestword = (word.length() < shortestword.length()) ? word : shortestword;
+        }
+        newStr = full.replace(shortestword+" ", "");
+        if (newStr.length()-(f.length-1) >= 32 && numRemoved < 5) {
+            return receiptBrute(newStr, numRemoved+1);
         }
         return newStr;
     }
@@ -231,48 +239,47 @@ public class row {
      */
     private String getReceiptAlias(String cellValue) {
         String newString = "";
-	String sub = "";
-	String fromalias = null;
-	String temp = "";
-        cellValue = cellValue.contains(brand) ? cellValue.replace(brand, "") : cellValue;
+        String sub = "";	
+        String temp = "";
+        String fromalias = null;
+        //if (cellValue.contains(brand) && brand != null) { cellValue = cellValue.replace(brand, ""); }
         if (cellValue.length() <= 32 ){ return cellValue.replaceAll("[^0-9A-Za-z\\. ]",""); }
         if (cellValue.contains(" ORGANIC")) { cellValue = cellValue.replace(" ORGANIC", ""); this.isOrganic = true; }
-	cellValue = receiptBrute(cellValue, 0);
-        String[] parsed = cellValue.replaceAll("[^0-9A-Za-z\\. ]","").split(" ");
+        cellValue = receiptBrute(cellValue, 0);        
+        //split to array and remove all parenthesis
+        String[] parsed = cellValue.replaceAll("\\([^()]*\\)", "").split(" ");
         int NUM_REMOVE = cellValue.length() - 32;
 
-	//loops through substrings
+    	//loops through substrings
         for (int i = 0; i < parsed.length; i++) {
             sub = (i == parsed.length-1) ? parsed[i].replace("\n", "") : parsed[i];
             //if substring already has an alias, concatenate that and continue
-	    fromalias = aliases.get(sub);
+	        fromalias = aliases.get(sub);
             if (fromalias != null) {                
                 newString += (i==0) ? fromalias : " "+fromalias;
                 NUM_REMOVE -= sub.length() - fromalias.length();
                 continue;
             }
             //Regex to fix year
-            if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue;}
+            if (sub.matches("^[1-2][0-9]{3}$")) { NUM_REMOVE-=2; newString += " "+sub.substring(2,4); continue; }
             //otherwise this mess... remove vowels ?
             else {
                 temp = sub;
-                int numRemoved = 0;
                 for (String ch : chars) {
                     int v = temp.lastIndexOf(ch);
                     //excludes first and last character
                     if (v > 0 && v < temp.length()-1 && NUM_REMOVE > 0) {
                         temp = temp.substring(0,v) + (temp.substring(v+1, temp.length()));
-                        numRemoved++;
                         NUM_REMOVE--;
                     }
                 }
                 newString += i==0 ? temp : " "+temp;
             }
-        }/*
-	if (NUM_REMOVE > 0) {
-            return receiptBrute(newString, 0);
-	    }*/
-        return newString;
+            if (newString.length() > 32) {
+                return newString.substring(0, newString.lastIndexOf(' ')).replace("  ", " ");
+            }
+        }
+        return newString.replace("  ", " ");
     }
     private void setBrand(String a) { this.brand = a; }
 
@@ -309,25 +316,9 @@ public class row {
     public static void main(String[] args) throws IOException {
         row wb = new row();
         wb.setBrand("KETTLE CUISINE");
-        String test = "BROUWERIJ VERHAEGHE DUCHESSE DE BOURGOGNE FLEMISH RD 2006\n";
-        test = "SOUP HUNGARIAN MUSHROOM NATURAL KETTLE CUISINE\t";
-	test = "JUICE DAILY GREENS KOSHER BOLTHOUSE FARMS";
-        String tst = "SOUP FRENCH ONION NATURAL KETTLE CUISINE\t";
+        String test = "LIQUID MAGNESIUM GLYCINATE TANGY BERRY 32OZ\n";
         String ret = wb.getReceiptAlias(test);
-        String rt = wb.getReceiptAlias(tst);
         System.out.println("Start Phrase: " + test.length() + "\n" + test);
         System.out.println("End Phrase: " + ret.length() + "\n" + ret);
-
-        System.out.println("Start Phrase: " + tst.length() + "\n" + tst);
-        System.out.println("End Phrase: " + rt.length() + "\n" + rt);
-
-        String the = "071537075403	POLAR	4.12	1007540	POLAR	EA	1	CARBO	3GJ	WATER	CARB	POL PURIFIED 3GAL CARBOY	POL PURIFIED 3GAL CARBOY	071537075403	071537075403	4.12";
-        String ts = "UPC	BRAND	COST EACH	SUID	VENDOR	UOM	CASE PK	SIZE	PACK SIZE	Category	FLAVOR	ITEM NAME	RECEIPT ALIAS	UNITUPC	CASEUPC	CASE PRICE";
-        row t = new row(the.split("\t"), Arrays.asList(ts.split("\t")), false);
-        System.out.println("\n"+t.def);
-        System.out.println(t.getLine());
-        //catalog test = new catalog();
-        //System.out.println(test.checkDigit("03600024147"));
-
     }
 }
