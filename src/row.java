@@ -1,7 +1,7 @@
 package src;
 
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 import java.util.Scanner;
 import java.io.*;
 import java.util.ArrayList;
@@ -82,10 +82,10 @@ public class row {
     }
 
     public void createLine(List<String> order) {
-        if (upc == "" || alias =="") {
+        /*if (upc == "" || alias =="") {
             line = null;
             return;
-        }
+        }*/
         String[] unchanged = def.split("\t");  
         int len = unchanged.length;
         int default_index = 0;
@@ -164,6 +164,11 @@ public class row {
 
     private String getUPC(String theUPC) {
         String UPC = (theUPC.charAt(0) == '0' && theUPC.length() == 12) ? removeLead(theUPC) : theUPC;
+        Pattern p = Pattern.compile("(0-9){6}(0)*");
+        Matcher m = p.matcher(UPC);
+        if (m.find()) {
+            UPC = UPC.substring(0,6);
+        }
         String newUPC = "";                
         if (UPC.contains(".")) {System.out.println("error: "+UPC);}
         switch (UPC.length()) {
@@ -178,7 +183,7 @@ public class row {
                     newUPC = UPC;
                 }
         }
-        if (newUPC.length() > 12) { System.out.println(theUPC +"\t"+UPC);}
+        if (newUPC.length() > 12) { System.out.println(theUPC +"\t"+newUPC);}
         return newUPC;
     }
 
