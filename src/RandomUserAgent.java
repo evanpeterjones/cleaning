@@ -1,3 +1,6 @@
+/*pulled from "mkstayalive/random-user-agent-java" on github
+Gbless America for open source*/
+
 package src;
 
 import java.util.HashMap;
